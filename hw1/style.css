@@ -2,3 +2,28 @@ h1 {
     font-family: 'Open Sans', sans-serif;
     color: #1946ba;
 }
+
+h2 {
+    font-family: 'Open Sans', sans-serif;
+}
+
+.quoteOuterBox {
+    border: 1px solid #F5F5F5;    
+    max-width: 960px;
+    margin: 20px;
+    padding: 5px;
+}
+
+.quoteInnerBox {
+    border-left: 5px solid #a1abba;
+    padding: 10px;
+    margin: 20px;
+}
+
+button {
+    color: #F5F5F5;
+    background-color: #ec0b43;
+    padding: 10px;
+    border: none;
+    margin: 25px;
+}
