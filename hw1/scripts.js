@@ -1,38 +1,54 @@
 var quotesOnPage = document.getElementsByTagName("p");
+var selector = '[id^="Quote_"';
 
-function getRandomQuote() {
-    return quotesOnPage[Math.floor(Math.random() * quotesOnPage.length)].innerText;
+var lastRandomQuoteIndex = 0;
+
+function getRandomQuoteNumber() {
+    return Math.floor(Math.random() * quotesOnPage.length);
 }
 
-// now it works awful because 'random' can return same number as being before
-// TODO: fix this sheet
+function getRandomQuote() {
+    return quotesOnPage[getRandomQuoteNumber()].innerText;
+}
+
+function getQuote(index) {
+    return quotesOnPage[index];
+}
+
+function getNewUniqueNumber() {
+    let index = getRandomQuoteNumber();
+    while (index === lastRandomQuoteIndex) {
+        index = getRandomQuoteNumber();
+    }
+    return index;
+}
 
 function changeQuoteOfTheDay() {
-    return document.getElementById('quoteOfTheDay').innerText = getRandomQuote(quotesOnPage)
+    lastRandomQuoteIndex = getNewUniqueNumber();
+
+    let tmpQuote = document.getElementById('QuoteOfTheDay').innerText;
+    document.getElementById('QuoteOfTheDay').innerText = getQuote(lastRandomQuoteIndex).innerText;
+    getQuote(lastRandomQuoteIndex).innerText = tmpQuote;
 }
 
 function sortQuotes() {
-    var quotesArrayForSorting = [];
+    let otherQuotes = document.querySelectorAll(selector);
 
-    var selector = '[id^="Quote_"'
-    var otherQuotesOnPage = document.querySelectorAll(selector);
-
-    for(var item of otherQuotesOnPage) {
-        // console.log(item.innerText)
-        quotesArrayForSorting.push(item.innerText)
-    }
-    quotesArrayForSorting.sort();
-
-    var otherQuotes = document.querySelectorAll(selector);
-
+    let sortedStrings = getStringArrayFromTags();
     var i = 0;
     for(var item of otherQuotes) {
-        item.innerText = quotesArrayForSorting[i++];
+        item.innerText = sortedStrings[i++];
     }
 }
 
-// function test() {
-//     // console.log('Changed Quote Of The Day: ' +  getRandomQuote(quotesOnPage))
-//     // console.log('Quote looks like: ' + changeQuoteOfTheDay(quotesOnPage))
-//     console.log('sort (?): ' + sortQuotes())
-// }
+function getStringArrayFromTags() {
+    let otherQuotesOnPage = document.querySelectorAll(selector);
+
+    let quotesArrayForSorting = [];
+    for(var item of otherQuotesOnPage) {
+        quotesArrayForSorting.push(item.innerText)
+    }
+
+    return quotesArrayForSorting.sort();
+}
+

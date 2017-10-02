@@ -18,6 +18,7 @@ button {
 .quoteOuterBox {
     border: 1px solid #F5F5F5;    
     max-width: 960px;
+    height: 200px;
     margin: 20px;
     padding: 5px;
 }
