@@ -11,7 +11,21 @@ function changeQuoteOfTheDay() {
     return document.getElementById('quoteOfTheDay').innerText = getRandomQuote(quotesOnPage)
 }
 
-// function test() {
-//     console.log('Changed Quote Of The Day: ' +  getRandomQuote(quotesOnPageOnPage))
-//     console.log('Quote looks like: ' + changeQuoteOfTheDay(quotesOnPageOnPage))
-// }
+function sortQuotes() {
+    var quotesArrayForSorting = [];
+    for(var item of quotesOnPage) {
+        // console.log(item.innerText)
+        quotesArrayForSorting.push(item.innerText)
+    }
+    quotesArrayForSorting.sort();
+
+    var selector = '[id^="Quote_"'
+    var otherQuotes = document.querySelectorAll(selector);
+    return otherQuotes.length
+}
+
+function test() {
+    // console.log('Changed Quote Of The Day: ' +  getRandomQuote(quotesOnPage))
+    // console.log('Quote looks like: ' + changeQuoteOfTheDay(quotesOnPage))
+    console.log('sort (?): ' + sortQuotes())
+}
