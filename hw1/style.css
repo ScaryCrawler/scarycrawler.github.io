@@ -7,6 +7,14 @@ h2 {
     font-family: 'Open Sans', sans-serif;
 }
 
+button {
+    color: #F5F5F5;
+    background-color: #ec0b43;
+    padding: 10px;
+    border: none;
+    margin: 25px;
+}
+
 .quoteOuterBox {
     border: 1px solid #F5F5F5;    
     max-width: 960px;
@@ -20,10 +28,8 @@ h2 {
     margin: 20px;
 }
 
-button {
-    color: #F5F5F5;
-    background-color: #ec0b43;
-    padding: 10px;
-    border: none;
-    margin: 25px;
+.otherQuotes {
+    border-left: 2px dashed #a1abba;
+    padding: 20px;
+    margin: 50px;
 }

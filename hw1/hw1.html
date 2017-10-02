@@ -3,22 +3,37 @@
     <head>
         <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
         <link href="style.css" rel="stylesheet" type="text/css">
+
+        <script src="scripts.js" rel="script" type="application/javascript"></script>
         
         <title>VIS 101 Homework</title>
         <h1>First VIS101 Homework</h1>
     </head>
     <body>
-        <div class="quoteOuterBox">
+        <div id="QuoteOfTheDayBlock" class="quoteOuterBox">
             <h2>Quote Of the Day:</h2>
             <div class="quoteInnerBox">
-                <p>
-                    All successful men and women are big dreamers. They imagine what their future could be, ideal in every respect, and then they work every day toward their distant vision, that goal or purpose." - Brian Tracy
+                <p id="quoteOfTheDay">
+                    "All successful men and women are big dreamers. They imagine what their future could be, ideal in every respect, and then they work every day toward their distant vision, that goal or purpose." - Brian Tracy
                 </p>
             </div>
         </div>
-            <button onclick="">Change Quote of the Day</button>
-        <div>
-
+        <div id="Buttons">
+            <button onclick="changeQuoteOfTheDay()">Change Quote of the Day</button>
+        </div>
+        <div id="OtherQuotes" class="otherQuotes">
+            <p id="Quote_1">
+                "Genius is one percent inspiration and ninety-nine percent perspiration." - Thomas Edison
+            </p>
+            <p id="#Quote_2">
+                "You can observe a lot just by watching." - Yogi Berra
+            </p>
+            <p id="Quote_3">
+                "A house divided against itself cannot stand." - Abraham Lincoln
+            </p>
+            <p id="Quote_4">
+                "Genius is one percent inspiration and ninety-nine percent perspiration." - Thomas Edison
+            </p>
         </div>
     </body>
 </html>
