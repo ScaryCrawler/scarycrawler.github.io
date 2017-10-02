@@ -13,19 +13,26 @@ function changeQuoteOfTheDay() {
 
 function sortQuotes() {
     var quotesArrayForSorting = [];
-    for(var item of quotesOnPage) {
+
+    var selector = '[id^="Quote_"'
+    var otherQuotesOnPage = document.querySelectorAll(selector);
+
+    for(var item of otherQuotesOnPage) {
         // console.log(item.innerText)
         quotesArrayForSorting.push(item.innerText)
     }
     quotesArrayForSorting.sort();
 
-    var selector = '[id^="Quote_"'
     var otherQuotes = document.querySelectorAll(selector);
-    return otherQuotes.length
+
+    var i = 0;
+    for(var item of otherQuotes) {
+        item.innerText = quotesArrayForSorting[i++];
+    }
 }
 
-function test() {
-    // console.log('Changed Quote Of The Day: ' +  getRandomQuote(quotesOnPage))
-    // console.log('Quote looks like: ' + changeQuoteOfTheDay(quotesOnPage))
-    console.log('sort (?): ' + sortQuotes())
-}
+// function test() {
+//     // console.log('Changed Quote Of The Day: ' +  getRandomQuote(quotesOnPage))
+//     // console.log('Quote looks like: ' + changeQuoteOfTheDay(quotesOnPage))
+//     console.log('sort (?): ' + sortQuotes())
+// }
