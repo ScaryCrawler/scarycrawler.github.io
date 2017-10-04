@@ -1,14 +1,15 @@
 var quotesOnPage = document.getElementsByTagName("p");
 var selector = '[id^="Quote_"';
+var quotesPath = 'https://raw.githubusercontent.com/4skinSkywalker/Database-Quotes-JSON/master/quotes.json'
 
 var lastRandomQuoteIndex = 0;
 
-function getRandomQuoteNumber() {
-    return Math.floor(Math.random() * quotesOnPage.length);
+function getRandomQuoteNumber(maxValue) {
+    return Math.floor(Math.random() * maxValue);
 }
 
 function getRandomQuote() {
-    return quotesOnPage[getRandomQuoteNumber()].innerText;
+    return quotesOnPage[getRandomQuoteNumber(quotesOnPage.length)].innerText;
 }
 
 function getQuote(index) {
@@ -16,9 +17,9 @@ function getQuote(index) {
 }
 
 function getNewUniqueNumber() {
-    let index = getRandomQuoteNumber();
+    let index = getRandomQuoteNumber(quotesOnPage.length);
     while (index === lastRandomQuoteIndex) {
-        index = getRandomQuoteNumber();
+        index = getRandomQuoteNumber(quotesOnPage.length);
     }
     return index;
 }
@@ -50,5 +51,19 @@ function getStringArrayFromTags() {
     }
 
     return quotesArrayForSorting.sort();
+}
+
+function getRandomQuotesFromJson() {
+    var xmlhttp = new XMLHttpRequest();
+
+    xmlhttp.open('GET', quotesPath, false);
+    xmlhttp.send();
+
+    if(xmlhttp.status === 200) {
+        let quotes = JSON.parse(xmlhttp.responseText);
+        let randomQuoteNumber = getRandomQuoteNumber(quotes.length);
+        document.getElementById('QuoteOfTheDay').innerText =
+            '"' + quotes[randomQuoteNumber].quoteText + '" - ' + quotes[randomQuoteNumber].quoteAuthor;
+    } else console.log('Error with remote json file')
 }
 
