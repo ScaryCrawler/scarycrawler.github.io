@@ -1,16 +1,28 @@
 var quotesOnPage = document.getElementsByTagName("p");
-var selector = '[id^="Quote_"';
+
+var quotesJsonDataBase;
 var quotesPath = 'https://raw.githubusercontent.com/4skinSkywalker/Database-Quotes-JSON/master/quotes.json'
 
 var lastRandomQuoteIndex = 0;
+
+function loadQuotesFromRemoteDataBase() {
+    var xmlhttp = new XMLHttpRequest();
+
+    xmlhttp.open('GET', quotesPath, false);
+    xmlhttp.send();
+
+    if(xmlhttp.status === 200) {
+        quotesJsonDataBase = JSON.parse(xmlhttp.responseText);
+    } else console.log('Error with remote json file')
+}
 
 function getRandomQuoteNumber(maxValue) {
     return Math.floor(Math.random() * maxValue);
 }
 
-function getRandomQuote() {
-    return quotesOnPage[getRandomQuoteNumber(quotesOnPage.length)].innerText;
-}
+// function getRandomQuote() {
+//     return quotesOnPage[getRandomQuoteNumber(quotesOnPage.length)].innerText;
+// }
 
 function getQuote(index) {
     return quotesOnPage[index];
@@ -33,7 +45,7 @@ function changeQuoteOfTheDay() {
 }
 
 function sortQuotes() {
-    let otherQuotes = document.querySelectorAll(selector);
+    let otherQuotes = document.getElementsByClassName('otherQuotes');
 
     let sortedStrings = getStringArrayFromTags();
     var i = 0;
@@ -43,7 +55,7 @@ function sortQuotes() {
 }
 
 function getStringArrayFromTags() {
-    let otherQuotesOnPage = document.querySelectorAll(selector);
+    let otherQuotesOnPage = document.getElementsByClassName('otherQuotes');
 
     let quotesArrayForSorting = [];
     for(var item of otherQuotesOnPage) {
@@ -54,16 +66,9 @@ function getStringArrayFromTags() {
 }
 
 function getRandomQuotesFromJson() {
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.open('GET', quotesPath, false);
-    xmlhttp.send();
-
-    if(xmlhttp.status === 200) {
-        let quotes = JSON.parse(xmlhttp.responseText);
-        let randomQuoteNumber = getRandomQuoteNumber(quotes.length);
-        document.getElementById('QuoteOfTheDay').innerText =
-            '"' + quotes[randomQuoteNumber].quoteText + '" - ' + quotes[randomQuoteNumber].quoteAuthor;
-    } else console.log('Error with remote json file')
+    let randomQuoteNumber = getRandomQuoteNumber(quotesJsonDataBase.length);
+    document.getElementById('QuoteOfTheDay').innerText =
+        '"' + quotesJsonDataBase[randomQuoteNumber].quoteText + '" - '
+        + quotesJsonDataBase[randomQuoteNumber].quoteAuthor;
 }
 
