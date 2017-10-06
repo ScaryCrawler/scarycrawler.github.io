@@ -5,10 +5,12 @@ var quotesPath = 'https://raw.githubusercontent.com/4skinSkywalker/Database-Quot
 
 var lastRandomQuoteIndex = 0;
 
-function loadQuotesFromRemoteDataBase() {
-    var xmlhttp = new XMLHttpRequest();
+var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.open('GET', quotesPath, false);
+function loadQuotesFromRemoteDataBase() {
+    xmlhttp = new XMLHttpRequest();
+
+    xmlhttp.open('GET', quotesPath, true);
     xmlhttp.send();
 
     if(xmlhttp.status === 200) {
@@ -66,6 +68,10 @@ function getStringArrayFromTags() {
 }
 
 function getRandomQuotesFromJson() {
+    if(xmlhttp.status === 200 && quotesJsonDataBase === undefined) {
+        quotesJsonDataBase = JSON.parse(xmlhttp.responseText);
+    }
+
     let randomQuoteNumber = getRandomQuoteNumber(quotesJsonDataBase.length);
     document.getElementById('QuoteOfTheDay').innerText =
         '"' + quotesJsonDataBase[randomQuoteNumber].quoteText + '" - '
