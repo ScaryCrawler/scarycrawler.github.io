@@ -22,9 +22,6 @@ function getRandomQuoteNumber(maxValue) {
     return Math.floor(Math.random() * maxValue);
 }
 
-// function getRandomQuote() {
-//     return quotesOnPage[getRandomQuoteNumber(quotesOnPage.length)].innerText;
-// }
 
 function getQuote(index) {
     return quotesOnPage[index];
@@ -49,14 +46,14 @@ function changeQuoteOfTheDay() {
 function sortQuotes() {
     let otherQuotes = document.getElementsByClassName('otherQuotes');
 
-    let sortedStrings = getStringArrayFromTags();
+    let sortedStrings = getSortedStringArrayFromTags();
     var i = 0;
     for(var item of otherQuotes) {
         item.innerText = sortedStrings[i++];
     }
 }
 
-function getStringArrayFromTags() {
+function getSortedStringArrayFromTags() {
     let otherQuotesOnPage = document.getElementsByClassName('otherQuotes');
 
     let quotesArrayForSorting = [];
