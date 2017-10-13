@@ -1,5 +1,7 @@
 var dataset_Countries2012;
 
+var sortOrderAsc = true;
+
 function drawTable() {
     console.log(dataset_Countries2012);
     let columnsKeys = Object.keys(dataset_Countries2012[0]);
@@ -8,6 +10,8 @@ function drawTable() {
 
     let desireColumns = getNeededColumnKeys(columnsKeys);
     console.log(desireColumns);
+
+    dataset_Countries2012.forEach(o => formatStringRepresent(o));
 
     let table = d3.select('body').append('table'),
         thead = table.append('thead').attr('class', 'thead'),
@@ -23,7 +27,11 @@ function drawTable() {
         .text(d => d)
         .on('click', (header, i) => tbody
             .selectAll('tr')
-            .sort((a, b) => d3.descending(a[header], b[header])));
+            .sort((a, b) => sortOrderAsc ?
+                d3.ascending(a[header], b[header]) : d3.descending(a[header], b[header]),
+                sortOrderAsc = !sortOrderAsc));
+            // .sort((a, b) => sorting(a[header], b[header]), sortOrderAsc = !sortOrderAsc));
+            // .sort((a, b) => d3.descending(a[header], b[header])));
 
     let rows = tbody.selectAll('tr.row')
         .data(dataset_Countries2012)
@@ -45,6 +53,23 @@ function drawTable() {
             .style("background-color", null)
             .selectAll('td')
             .style("background-color", null));
+}
+
+// function sorting(a, b) {
+//     if (sortOrderAsc) {
+//         return d3.ascending(a, b)
+//     }
+//     else {
+//         return d3.descending(a, b)
+//     }
+// }
+
+function formatStringRepresent(str) {
+    str.population = d3.format(',')(str.population);
+    str.life_expectancy = d3.format('.1f')(str.life_expectancy);
+    // str.gdp = d3.forma
+
+    // console.log(str.population);
 }
 
 function getNeededColumnKeys(columnsKeys) {
