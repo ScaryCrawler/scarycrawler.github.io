@@ -1,54 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <meta charset="utf-8">
+<head>
+    <link href="styles.css" type="text/css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="scripts.js"></script>
+</head>
 <body>
-<script src="https://d3js.org/d3.v4.min.js"></script>
-<script src="scripts.js"></script>
-<script>
+    <script>
+        // get data from remote server
+        // if all right - save it to global variable and draw table
+        d3.json("https://raw.githubusercontent.com/ScaryCrawler/scarycrawler.github.io/master/countries_2012.json",
+           (error, data) => (error !== null) ? console.log(error) : (dataset_Countries2012 = data, drawTable())
+        );
 
-    d3.json("https://raw.githubusercontent.com/ScaryCrawler/scarycrawler.github.io/master/countries_2012.json",
-        function(error, data){
-
-        var columns = Object.keys(data[0]);
-
-        columns = getNeededColumnKeys(columns);
-        columns.forEach(t => console.log(t))
-
-//        var table = d3.select("body").append("table"),
-//            thead = table.append("thead")
-//                .attr("class", "thead");
-//        tbody = table.append("tbody");
-//
-//        table.append("caption")
-//            .html("World Countries Ranking");
-//
-//        thead.append("tr").selectAll("th")
-//            .data(columns)
-//            .enter()
-//            .append("th")
-//            .text(function(d) { return d; })
-//            .on("click", function(header, i) {
-//                tbody.selectAll("tr").sort(function(a, b) {
-//                    return d3.descending(a[header], b[header]);
-//                });
-//            });
-//
-//        var rows = tbody.selectAll("tr.row")
-//            .data(data)
-//            .enter()
-//            .append("tr").attr("class", "row");
-//
-//        var cells = rows.selectAll("td")
-//            .data(function(row) {
-//                return d3.range(Object.keys(row).length).map(function(column, i) {
-//                    return row[Object.keys(row)[i]];
-//                });
-//            })
-//            .enter()
-//            .append("td")
-//            .text(function(d) { return d; })
-
-    });
-</script>
+    </script>
 </body>
 </html>
