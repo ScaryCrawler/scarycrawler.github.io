@@ -1,6 +1,13 @@
 var dataset_Countries2012;
 
-var sortOrderAsc = true;
+var sortingOrder = { // true for asc
+    name: true,      // false for desc
+    continent: true,
+    gdp: true,
+    life_expectancy: true,
+    population: true,
+    year: true
+};
 
 function drawTable() {
     console.log(dataset_Countries2012);
@@ -24,18 +31,19 @@ function drawTable() {
         .data(desireColumns)
         .enter()
         .append('th')
+        .attr('class', 'tableHeaders')
         .text(d => d)
-        .on('click', (header, i) => tbody
+        .on('click', function(header, i) { tbody
             .selectAll('tr')
-            .sort((a, b) => sorting(a[header], b[header]),
-                sortOrderAsc = !sortOrderAsc))
-        .on('mouseover', function (header, i) {
-            console.log(this)
-            d3.select(this)
-                .style('cursor', 'n-resize')
+            .sort((a, b) => sorting(a[header], b[header], sortingOrder[header]),
+                sortingOrder[header] = !sortingOrder[header]),
+                d3.select(this)
+                    .style('cursor', () => changeCursorState(sortingOrder[header]))
         })
-        .on('mouseout', () => tbody.selectAll('th')
-            .style('cursor', null));
+        .on('mouseover', function (header, i) {
+            d3.select(this)
+                .style('cursor', () => changeCursorState(sortingOrder[header]))
+        });
 
     let rows = tbody.selectAll('tr.row')
         .data(dataset_Countries2012)
@@ -60,14 +68,17 @@ function drawTable() {
             .style("background-color", null));
 }
 
-function sorting(a, b) {
-    console.log()
-    if (sortOrderAsc) {
+function sorting(a, b, header) {
+    if (header) {
         return d3.ascending(a, b)
     }
     else {
         return d3.descending(a, b)
     }
+}
+
+function changeCursorState(header) {
+    return header ? 'url(images/up-arrow.png), auto' : 'url(images/down-arrow.png), auto';
 }
 
 function formatStringRepresent(str) {
