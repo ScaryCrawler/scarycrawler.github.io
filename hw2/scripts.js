@@ -13,7 +13,7 @@ function drawTable() {
 
     dataset_Countries2012.forEach(o => formatStringRepresent(o));
 
-    let table = d3.select('body').append('table'),
+    let table = d3.select('body').append('table').attr('class', 'tableClass'),
         thead = table.append('thead').attr('class', 'thead'),
         tbody = table.append('tbody');
 
@@ -28,9 +28,14 @@ function drawTable() {
         .on('click', (header, i) => tbody
             .selectAll('tr')
             .sort((a, b) => sorting(a[header], b[header]),
-                sortOrderAsc = !sortOrderAsc));
-            // .sort((a, b) => sorting(a[header], b[header]), sortOrderAsc = !sortOrderAsc));
-            // .sort((a, b) => d3.descending(a[header], b[header])));
+                sortOrderAsc = !sortOrderAsc))
+        .on('mouseover', function (header, i) {
+            console.log(this)
+            d3.select(this)
+                .style('cursor', 'n-resize')
+        })
+        .on('mouseout', () => tbody.selectAll('th')
+            .style('cursor', null));
 
     let rows = tbody.selectAll('tr.row')
         .data(dataset_Countries2012)
@@ -43,6 +48,7 @@ function drawTable() {
             .map((column, i) => row[desireColumns[i]]))
         .enter()
         .append('td')
+        .attr('class', 'customCell')
         .text(d => d)
         .on('mouseover', function (d, i) {            // remember this shit, dear reader...
             d3.select(this.parentNode)                // in this place we couldn't use some lambdas. Why?
@@ -55,6 +61,7 @@ function drawTable() {
 }
 
 function sorting(a, b) {
+    console.log()
     if (sortOrderAsc) {
         return d3.ascending(a, b)
     }
@@ -66,7 +73,6 @@ function sorting(a, b) {
 function formatStringRepresent(str) {
     str.population = d3.format(',')(str.population);
     str.life_expectancy = d3.format('.1f')(str.life_expectancy);
-    // str.gdp = d3.forma
 
     // console.log(str.population);
 }
