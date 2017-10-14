@@ -27,8 +27,7 @@ function drawTable() {
         .text(d => d)
         .on('click', (header, i) => tbody
             .selectAll('tr')
-            .sort((a, b) => sortOrderAsc ?
-                d3.ascending(a[header], b[header]) : d3.descending(a[header], b[header]),
+            .sort((a, b) => sorting(a[header], b[header]),
                 sortOrderAsc = !sortOrderAsc));
             // .sort((a, b) => sorting(a[header], b[header]), sortOrderAsc = !sortOrderAsc));
             // .sort((a, b) => d3.descending(a[header], b[header])));
@@ -40,7 +39,7 @@ function drawTable() {
         .attr('class', 'row');
 
     let cells = rows.selectAll('td')
-        .data(row => d3.range(Object.keys(row).length)
+        .data(row => d3.range(desireColumns.length)
             .map((column, i) => row[desireColumns[i]]))
         .enter()
         .append('td')
@@ -55,14 +54,14 @@ function drawTable() {
             .style("background-color", null));
 }
 
-// function sorting(a, b) {
-//     if (sortOrderAsc) {
-//         return d3.ascending(a, b)
-//     }
-//     else {
-//         return d3.descending(a, b)
-//     }
-// }
+function sorting(a, b) {
+    if (sortOrderAsc) {
+        return d3.ascending(a, b)
+    }
+    else {
+        return d3.descending(a, b)
+    }
+}
 
 function formatStringRepresent(str) {
     str.population = d3.format(',')(str.population);
@@ -81,7 +80,7 @@ function getNeededColumnKeys(columnsKeys) {
                 neededColumnsKeys.push(x);
                 break;
             case 'name':
-                neededColumnsKeys.push(x);
+                neededColumnsKeys.unshift(x);
                 break;
             case 'gdp':
                 neededColumnsKeys.push(x);
