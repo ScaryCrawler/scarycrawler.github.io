@@ -26,6 +26,7 @@ function drawTable() {
 
     table.append('caption')
         .html("World Countries Ranking")
+        .attr('class', 'caption');
 
     thead.append('tr').selectAll('th')
         .data(desireColumns)
@@ -35,8 +36,9 @@ function drawTable() {
         .text(d => d)
         .on('click', function(header, i) { tbody
             .selectAll('tr')
-            .sort((a, b) => sorting(a[header], b[header], sortingOrder[header]),
-                sortingOrder[header] = !sortingOrder[header]),
+            .sort((a, b) => sorting(a[header], b[header], header)),
+                sortingOrder[header] = !sortingOrder[header],
+                colorizeTableInZebraStyle(tbody),
                 d3.select(this)
                     .style('cursor', () => changeCursorState(sortingOrder[header]))
         })
@@ -49,7 +51,12 @@ function drawTable() {
         .data(dataset_Countries2012)
         .enter()
         .append('tr')
+        .each(function (d, i) {
+            d3.select(this)
+                .attr('class', (i % 2 === 0) ? 'even' : 'odd')
+        })
         .attr('class', 'row');
+
 
     let cells = rows.selectAll('td')
         .data(row => d3.range(desireColumns.length)
@@ -62,30 +69,51 @@ function drawTable() {
             d3.select(this.parentNode)                // in this place we couldn't use some lambdas. Why?
                 .style("background-color", "#F3ED86") // because keyword 'this' in lambdas determined by where lambda
         })                                            // was defined. DEFINED - NOT USED, KARL!
-        .on('mouseout', () => tbody.selectAll('tr')
-            .style("background-color", null)
-            .selectAll('td')
-            .style("background-color", null));
+        .on('mouseout', function () {
+            tbody.selectAll('tr')
+                .style("background-color", null);
+            colorizeTableInZebraStyle(tbody);
+        });
 }
+
+// var sorting = (a, b, header) => header ?
+//     d3.ascending(a, b) : d3.descending(a, b);
 
 function sorting(a, b, header) {
-    if (header) {
-        return d3.ascending(a, b)
+    if (header === 'population') {
+        return sortingOrder[header] ? d3.ascending(parseInt(a.replace(/,/g,'')), parseInt(b.replace(/,/g,''))) :
+            d3.descending(parseInt(a.replace(/,/g,'')), parseInt(b.replace(/,/g,'')))
     }
-    else {
-        return d3.descending(a, b)
+    if (header === 'gdp') {
+        a = a.toString();
+        b = b.toString();
+        return sortingOrder[header] ?
+            d3.ascending(parseInt(a.replace('.','').replace('T','000')), parseInt(b.replace('.','').replace('T','000'))) :
+            d3.descending(parseInt(a.replace('.','').replace('T','000')), parseInt(b.replace('.','').replace('T','000')))
     }
+    return sortingOrder[header] ? d3.ascending(a, b) : d3.descending(a, b);
 }
 
-function changeCursorState(header) {
-    return header ? 'url(images/up-arrow.png), auto' : 'url(images/down-arrow.png), auto';
+var changeCursorState = (header) => header ?
+    'url(images/down-arrow_2.png), auto' : 'url(images/up-arrow_2.png), auto';
+
+
+function colorizeTableInZebraStyle(tbody) {
+    tbody.selectAll('tr')
+        .each(function (d, i) {
+            d3.select(this)
+                .attr('class', (i % 2 === 0) ? 'odd' : 'even')
+        })
 }
 
 function formatStringRepresent(str) {
     str.population = d3.format(',')(str.population);
     str.life_expectancy = d3.format('.1f')(str.life_expectancy);
 
-    // console.log(str.population);
+    if(str.gdp > 1e9 && str.gdp < 1e12)
+        str.gdp = d3.formatPrefix(',.1', 1e9)(str.gdp);
+    if(str.gdp > 1e12)
+        str.gdp = d3.formatPrefix(',.1', 1e12)(str.gdp);
 }
 
 function getNeededColumnKeys(columnsKeys) {
