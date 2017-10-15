@@ -36,7 +36,7 @@ function drawTable() {
         .text(d => d)
         .on('click', function(header, i) { tbody
             .selectAll('tr')
-            .sort((a, b) => sorting(a[header], b[header], header)),
+            .sort((a, b) => sorting(a, b, header)),
                 sortingOrder[header] = !sortingOrder[header],
                 colorizeTableInZebraStyle(tbody),
                 d3.select(this)
@@ -76,23 +76,49 @@ function drawTable() {
         });
 }
 
-// var sorting = (a, b, header) => header ?
-//     d3.ascending(a, b) : d3.descending(a, b);
-
 function sorting(a, b, header) {
+    // switch (header) {
+    //     // case 'continent' : {
+    //     //     if (a[header] === b[header]) // TODO: ask about order in country name in desc use case
+    //     //         return sorter(a['name'], b['name'], sortingOrder[header]);
+    //     //     break;
+    //     // }
+    //     case 'population' :
+    //         return sorter(populationParseFormatter(a[header]),
+    //             populationParseFormatter(b[header]),
+    //             sortingOrder[header]);
+    //         break;
+    //     case 'gdp' :
+    //         a[header] = a[header].toString();
+    //         b[header] = b[header].toString();
+    //         return sorter(gdpParseFormatter(a[header]),
+    //             gdpParseFormatter(b[header]),
+    //             sortingOrder[header]);
+    //         break;
+    //     // default:
+    //     //     return sorter(a[header], b[header], sortingOrder[header]);
+    //         // break;
+    // }
+
+    if (header === 'continent') { // TODO: ask about order in country name in desc use case
+        if(a[header] === b[header])
+            return sorter(a['name'], b['name'], sortingOrder[header])
+    }
     if (header === 'population') {
-        return sortingOrder[header] ? d3.ascending(parseInt(a.replace(/,/g,'')), parseInt(b.replace(/,/g,''))) :
-            d3.descending(parseInt(a.replace(/,/g,'')), parseInt(b.replace(/,/g,'')))
+        return sorter(populationParseFormatter(a[header]), populationParseFormatter(b[header]), sortingOrder[header])
     }
     if (header === 'gdp') {
-        a = a.toString();
-        b = b.toString();
-        return sortingOrder[header] ?
-            d3.ascending(parseInt(a.replace('.','').replace('T','000')), parseInt(b.replace('.','').replace('T','000'))) :
-            d3.descending(parseInt(a.replace('.','').replace('T','000')), parseInt(b.replace('.','').replace('T','000')))
+        a[header] = a[header].toString();
+        b[header] = b[header].toString();
+        return sorter(gdpParseFormatter(a[header]), gdpParseFormatter(b[header]), sortingOrder[header])
     }
-    return sortingOrder[header] ? d3.ascending(a, b) : d3.descending(a, b);
+    return sortingOrder[header] ? d3.ascending(a[header], b[header]) : d3.descending(a[header], b[header]);
 }
+
+var gdpParseFormatter = (str) => parseInt(str.replace('.','').replace('T','000'));
+var populationParseFormatter = (str) => parseInt(str.replace(/,/g,''));
+var sorter = (a, b, order) => order ? d3.ascending(a, b) : d3.descending(a, b);
+
 
 var changeCursorState = (header) => header ?
     'url(images/down-arrow_2.png), auto' : 'url(images/up-arrow_2.png), auto';
