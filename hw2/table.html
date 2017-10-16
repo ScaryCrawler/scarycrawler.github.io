@@ -12,16 +12,10 @@
         // get data from remote server
         // if all right - save it to global variable and draw table
         d3.json("https://raw.githubusercontent.com/ScaryCrawler/scarycrawler.github.io/master/countries_2012.json",
-           (error, data) => (error !== null) ? console.log(error) : (dataset_Countries2012 = data, drawTable())
+           (error, data) => (error !== null) ? console.log(error) : (dataset_Countries2012 = data, drawTableByOneYear())
         );
 
     </script>
-    <!--<div id="YearRange">-->
-        <!--<label>Time Update: </label>-->
-        <!--<label>1995</label>-->
-        <!--<input type="range" min="1995" max="2012" step="1" value="1995">-->
-        <!--<label>2012</label>-->
-    <!--</div>-->
     <div id="FilterBy">
         <label>Filter by: </label>
 
