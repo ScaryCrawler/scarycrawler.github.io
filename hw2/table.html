@@ -16,33 +16,33 @@
         );
 
     </script>
-    <div id="YearRange">
-        <label>Time Update: </label>
-        <label>1995</label>
-        <input type="range" min="1995" max="2012" step="1" value="1995">
-        <label>2012</label>
-    </div>
+    <!--<div id="YearRange">-->
+        <!--<label>Time Update: </label>-->
+        <!--<label>1995</label>-->
+        <!--<input type="range" min="1995" max="2012" step="1" value="1995">-->
+        <!--<label>2012</label>-->
+    <!--</div>-->
     <div id="FilterBy">
         <label>Filter by: </label>
 
         <input type="checkbox" name="Americas" value="Americas" id="cbAmericas"
-               class="checkBox" onchange="onAmericaClicked()">
+               class="checkBox" onchange="onCbChanged(value)">
         <label for="cbAmericas">Americas</label>
 
         <input type="checkbox" name="Africa" value="Africa" id="cbAfrica"
-               class="checkBox" onchange="onCheckBoxStateChanged()">
+               class="checkBox" onchange="onCbChanged(value)">
         <label for="cbAfrica">Africa</label>
 
         <input type="checkbox" name="Asia" value="Asia" id="cbAsia"
-               class="checkBox" onchange="onCheckBoxStateChanged()">
+               class="checkBox" onchange="onCbChanged(value)">
         <label for="cbAsia">Asia</label>
 
         <input type="checkbox" name="Europe" value="Europe" id="cbEurope"
-               class="checkBox" onchange="onCheckBoxStateChanged()">
+               class="checkBox" onchange="onCbChanged(value)">
         <label for="cbEurope">Europe</label>
 
         <input type="checkbox" name="Oceania" value="Oceania" id="cbOceania"
-               class="checkBox" onchange="onCheckBoxStateChanged()">
+               class="checkBox" onchange="onCbChanged(value)">
         <label for="cbOceania">Oceania</label>
     </div>
 

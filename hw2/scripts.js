@@ -9,6 +9,14 @@ var sortingOrder = { // true for asc
     year: true
 };
 
+var cbContinentsState = {
+    Americas: false,
+    Africa: false,
+    Asia: false,
+    Europe: false,
+    Oceania: false
+};
+
 var gdpParseFormatter = (str) => parseInt(str.replace('.','').replace('T','000'));
 var populationParseFormatter = (str) => parseInt(str.replace(/,/g,''));
 var sorter = (a, b, order) => order ? d3.ascending(a, b) : d3.descending(a, b);
@@ -16,25 +24,14 @@ var sorter = (a, b, order) => order ? d3.ascending(a, b) : d3.descending(a, b);
 var changeCursorState = (header) => header ?
     'url(images/down-arrow_2.png), auto' : 'url(images/up-arrow_2.png), auto';
 
-
-let cells;
-let rows;
-let table;
-
 let desireColumns;
 
 function drawTable() {
-    console.log(dataset_Countries2012);
-    let columnsKeys = Object.keys(dataset_Countries2012[0]);
-    console.log(columnsKeys);
-
-
-    desireColumns = getNeededColumnKeys(columnsKeys);
-    console.log(desireColumns);
+    /*let */desireColumns = getNeededColumnKeys(Object.keys(dataset_Countries2012[0]));
 
     dataset_Countries2012.forEach(o => formatStringRepresent(o));
 
-    table = d3.select('body').append('table').attr('class', 'tableClass'),
+    let table = d3.select('body').append('table').attr('class', 'tableClass'),
         thead = table.append('thead').attr('class', 'thead'),
         tbody = table.append('tbody');
 
@@ -61,7 +58,7 @@ function drawTable() {
                 .style('cursor', () => changeCursorState(sortingOrder[header]))
         });
 
-    rows = tbody.selectAll('tr.row')
+    let rows = tbody.selectAll('tr.row')
         .data(dataset_Countries2012)
         .enter()
         .append('tr')
@@ -72,7 +69,7 @@ function drawTable() {
         .attr('class', 'row');
 
 
-    cells = rows.selectAll('td')
+    let cells = rows.selectAll('td')
         .data(row => d3.range(desireColumns.length)
             .map((column, i) => row[desireColumns[i]]))
         .enter()
@@ -92,83 +89,38 @@ function drawTable() {
     colorizeTableInZebraStyle(tbody);
 }
 
-function getChangedData() {
-    var changedData = [];
-    // console.log(Object.keys(states[0])[0]); // TODO: BULLSHIT
-    states.forEach(s => dataset_Countries2012.forEach(function (x) {
-        if (x.continent === Object.keys(s)[0])
-            changedData.push(x);
-    }));
-    return changedData;
-}
-
-
-function updateOnContinents() {
-    var changedData = getChangedData();
-
-    tbody.selectAll('tr')
-        .data(dataset_Countries2012)
+function onCbChanged(continent) {
+    console.log(continent)
+    console.log(d3.select('#cb' + continent).property('checked'))
+    cbContinentsState[continent] = d3.select('#cb' + continent).property('checked');
+    d3.select("table")
+        .select('tbody')
+        .selectAll('tr')
         .remove();
+    drawTableRows(d3.select("table").select('tbody'),
+        desireColumns,
+        dataset_Countries2012.filter(e => Object.values(cbContinentsState).includes(true) ?
+            cbContinentsState[e['continent']] : true
+        ))
+}
 
-    rows_ = tbody.selectAll('tr')
-        .data(changedData)
+function drawTableRows(body, columns, data){
+    let rows = body.selectAll("tr")
+        .data(data)
         .enter()
-        .append('tr')
-        .each(function (d, i) {
-            d3.select(this)
-                .attr('class', (i % 2 === 0) ? 'even' : 'odd')
-        })
-        .attr('class', 'row');
+        .append("tr");
 
-    cells = rows_.selectAll('td')
-        .data(row => d3.range(desireColumns.length)
-            .map((column, i) => row[desireColumns[i]]))
+    rows.selectAll("td")
+        .data(row => columns.map((column, i) => row[desireColumns[i]]))
         .enter()
-        .append('td')
-        .attr('class', 'customCell')
-        .text(d => d)
-        .on('mouseover', function (d, i) {            // remember this shit, dear reader...
-            d3.select(this.parentNode)                // in this place we couldn't use some lambdas. Why?
-                .style("background-color", "#F3ED86") // because keyword 'this' in lambdas determined by where lambda
-        })                                            // was defined. DEFINED - NOT USED, KARL!
-        .on('mouseout', function () {
-            tbody.selectAll('tr')
-                .style("background-color", null);
-            colorizeTableInZebraStyle(tbody);
-        });
+        .append("td")
+        .text(d => d);
 
-    colorizeTableInZebraStyle(tbody);
-
-    // rows.data(changedData)
-    //     .exit()
-    //     .remove();
+    colorizeTableInZebraStyle(body);
 }
 
 function sorting(a, b, header) {
-    // switch (header) {
-    //     // case 'continent' : {
-    //     //     if (a[header] === b[header]) // TODO: ask about order in country name in desc use case
-    //     //         return sorter(a['name'], b['name'], sortingOrder[header]);
-    //     //     break;
-    //     // }
-    //     case 'population' :
-    //         return sorter(populationParseFormatter(a[header]),
-    //             populationParseFormatter(b[header]),
-    //             sortingOrder[header]);
-    //         break;
-    //     case 'gdp' :
-    //         a[header] = a[header].toString();
-    //         b[header] = b[header].toString();
-    //         return sorter(gdpParseFormatter(a[header]),
-    //             gdpParseFormatter(b[header]),
-    //             sortingOrder[header]);
-    //         break;
-    //     // default:
-    //     //     return sorter(a[header], b[header], sortingOrder[header]);
-    //         // break;
-    // }
-
-    if (header === 'continent') { // TODO: ask about order in country name in desc use case
+    if (header === 'continent') {
         if(a[header] === b[header])
             return sorter(a['name'], b['name'], sortingOrder[header])
     }
@@ -200,38 +152,6 @@ function formatStringRepresent(str) {
     if(str.gdp > 1e12)
         str.gdp = d3.formatPrefix(',.1', 1e12)(str.gdp);
 }
-
-function onCheckBoxStateChanged() {
-    d3.selectAll('input')
-        .each(function (d) {
-            console.log(d3.select(this).attr('checked'))
-        });
-
-    var a = Math.round(Math.random() * 50);
-
-    var test = dataset_Countries2012;
-    var changedData =  test.slice(a, a + 15);
-
-    updateOnContinents(changedData);
-}
-
-function onAmericaClicked() {
-    states[0].Americas = !states[0].Americas;
-
-    updateOnContinents();
-}
-
-var states = [
-    {Americas: false},
-    {Africa: false},
-    {Oceania: false}
-]
-
-// var states = {
-//     Americas: false,
-//     Africa: false,
-//     Oceania: false
-// }
 
 function getNeededColumnKeys(columnsKeys) {
     let neededColumnsKeys = [];
