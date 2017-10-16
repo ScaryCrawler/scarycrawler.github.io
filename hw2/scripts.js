@@ -9,18 +9,32 @@ var sortingOrder = { // true for asc
     year: true
 };
 
+var gdpParseFormatter = (str) => parseInt(str.replace('.','').replace('T','000'));
+var populationParseFormatter = (str) => parseInt(str.replace(/,/g,''));
+var sorter = (a, b, order) => order ? d3.ascending(a, b) : d3.descending(a, b);
+
+var changeCursorState = (header) => header ?
+    'url(images/down-arrow_2.png), auto' : 'url(images/up-arrow_2.png), auto';
+
+
+let cells;
+let rows;
+let table;
+
+let desireColumns;
+
 function drawTable() {
     console.log(dataset_Countries2012);
     let columnsKeys = Object.keys(dataset_Countries2012[0]);
     console.log(columnsKeys);
 
 
-    let desireColumns = getNeededColumnKeys(columnsKeys);
+    desireColumns = getNeededColumnKeys(columnsKeys);
     console.log(desireColumns);
 
     dataset_Countries2012.forEach(o => formatStringRepresent(o));
 
-    let table = d3.select('body').append('table').attr('class', 'tableClass'),
+    table = d3.select('body').append('table').attr('class', 'tableClass'),
         thead = table.append('thead').attr('class', 'thead'),
         tbody = table.append('tbody');
 
@@ -47,7 +61,7 @@ function drawTable() {
                 .style('cursor', () => changeCursorState(sortingOrder[header]))
         });
 
-    let rows = tbody.selectAll('tr.row')
+    rows = tbody.selectAll('tr.row')
         .data(dataset_Countries2012)
         .enter()
         .append('tr')
@@ -58,7 +72,7 @@ function drawTable() {
         .attr('class', 'row');
 
 
-    let cells = rows.selectAll('td')
+    cells = rows.selectAll('td')
         .data(row => d3.range(desireColumns.length)
             .map((column, i) => row[desireColumns[i]]))
         .enter()
@@ -74,6 +88,60 @@ function drawTable() {
                 .style("background-color", null);
             colorizeTableInZebraStyle(tbody);
         });
+
+    colorizeTableInZebraStyle(tbody);
+}
+
+function getChangedData() {
+    var changedData = [];
+    // console.log(Object.keys(states[0])[0]); // TODO: BULLSHIT
+    states.forEach(s => dataset_Countries2012.forEach(function (x) {
+        if (x.continent === Object.keys(s)[0])
+            changedData.push(x);
+    }));
+    return changedData;
+}
+
+
+function updateOnContinents() {
+    var changedData = getChangedData();
+
+    tbody.selectAll('tr')
+        .data(dataset_Countries2012)
+        .remove();
+
+    rows_ = tbody.selectAll('tr')
+        .data(changedData)
+        .enter()
+        .append('tr')
+        .each(function (d, i) {
+            d3.select(this)
+                .attr('class', (i % 2 === 0) ? 'even' : 'odd')
+        })
+        .attr('class', 'row');
+
+    cells = rows_.selectAll('td')
+        .data(row => d3.range(desireColumns.length)
+            .map((column, i) => row[desireColumns[i]]))
+        .enter()
+        .append('td')
+        .attr('class', 'customCell')
+        .text(d => d)
+        .on('mouseover', function (d, i) {            // remember this shit, dear reader...
+            d3.select(this.parentNode)                // in this place we couldn't use some lambdas. Why?
+                .style("background-color", "#F3ED86") // because keyword 'this' in lambdas determined by where lambda
+        })                                            // was defined. DEFINED - NOT USED, KARL!
+        .on('mouseout', function () {
+            tbody.selectAll('tr')
+                .style("background-color", null);
+            colorizeTableInZebraStyle(tbody);
+        });
+
+    colorizeTableInZebraStyle(tbody);
+
+    // rows.data(changedData)
+    //     .exit()
+    //     .remove();
 }
 
 function sorting(a, b, header) {
@@ -115,15 +183,6 @@ function sorting(a, b, header) {
     return sortingOrder[header] ? d3.ascending(a[header], b[header]) : d3.descending(a[header], b[header]);
 }
 
-var gdpParseFormatter = (str) => parseInt(str.replace('.','').replace('T','000'));
-var populationParseFormatter = (str) => parseInt(str.replace(/,/g,''));
-var sorter = (a, b, order) => order ? d3.ascending(a, b) : d3.descending(a, b);
-
-
-var changeCursorState = (header) => header ?
-    'url(images/down-arrow_2.png), auto' : 'url(images/up-arrow_2.png), auto';
-
-
 function colorizeTableInZebraStyle(tbody) {
     tbody.selectAll('tr')
         .each(function (d, i) {
@@ -141,6 +200,38 @@ function formatStringRepresent(str) {
     if(str.gdp > 1e12)
         str.gdp = d3.formatPrefix(',.1', 1e12)(str.gdp);
 }
+
+function onCheckBoxStateChanged() {
+    d3.selectAll('input')
+        .each(function (d) {
+            console.log(d3.select(this).attr('checked'))
+        });
+
+    var a = Math.round(Math.random() * 50);
+
+    var test = dataset_Countries2012;
+    var changedData =  test.slice(a, a + 15);
+
+    updateOnContinents(changedData);
+}
+
+function onAmericaClicked() {
+    states[0].Americas = !states[0].Americas;
+
+    updateOnContinents();
+}
+
+var states = [
+    {Americas: false},
+    {Africa: false},
+    {Oceania: false}
+]
+
+// var states = {
+//     Americas: false,
+//     Africa: false,
+//     Oceania: false
+// }
 
 function getNeededColumnKeys(columnsKeys) {
     let neededColumnsKeys = [];
