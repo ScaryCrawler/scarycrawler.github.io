@@ -17,7 +17,8 @@ var cbContinentsState = {
     Oceania: false
 };
 
-var gdpParseFormatter = (str) => parseInt(str.replace('.','').replace('T','000'));
+var gdpParseFormatter = (str) =>
+    parseFloat(str.replace('.','').replace('T','1e12').replace('G', '1e9').replace('P', '1e15'));
 var populationParseFormatter = (str) => parseInt(str.replace(/,/g,''));
 var sorter = (a, b, order) => order ? d3.ascending(a, b) : d3.descending(a, b);
 
@@ -68,6 +69,7 @@ function drawTable() {
         })
         .attr('class', 'row');
 
+    // drawTableRows(d3.select("table").select('tbody'), desireColumns, dataset_Countries2012);
 
     let cells = rows.selectAll('td')
         .data(row => d3.range(desireColumns.length)
@@ -93,15 +95,75 @@ function onCbChanged(continent) {
     console.log(continent)
     console.log(d3.select('#cb' + continent).property('checked'))
     cbContinentsState[continent] = d3.select('#cb' + continent).property('checked');
+
     d3.select("table")
         .select('tbody')
         .selectAll('tr')
         .remove();
+
     drawTableRows(d3.select("table").select('tbody'),
         desireColumns,
         dataset_Countries2012.filter(e => Object.values(cbContinentsState).includes(true) ?
             cbContinentsState[e['continent']] : true
         ))
+}
+
+function onRbChanged(aggregation) {
+    var data = dataset_Countries2012
+    if (!d3.select('#rb' + aggregation).property('checked') &&
+        d3.select('#rb' + aggregation).attr('value') === 'None' ||
+        d3.select('#rb' + aggregation).property('checked') &&
+        d3.select('#rb' + aggregation).attr('value') === 'Continent' ){
+            data = aggregate();
+    }
+
+    d3.select("table")
+        .select('tbody')
+        .selectAll('tr')
+        .remove();
+
+    drawTableRows(d3.select('table').select('tbody'), desireColumns, data)
+}
+
+function aggregate() {
+    let nestedRows =  d3.nest()
+        .key(d => d['continent'])
+        .rollup(leaves => {
+            let initial = JSON.parse(JSON.stringify(leaves[0]));
+            d3.keys(initial).forEach(key => initial[key] = 0);
+            initial.name = initial.continent = leaves[0].continent;
+            initial.year = leaves[0].year;
+
+
+            return leaves.reduce( (prev, curr) => {
+                let ans = {};
+                d3.keys(prev).forEach(key => {
+                    switch (key) {
+                        case 'gdp':
+                            curr[key] = curr[key].toString();
+                            ans[key] = prev[key] += gdpParseFormatter(curr[key]);
+                            break;
+                        case 'population':
+                            // console.log(prev[key])
+                            ans[key] = prev[key] += populationParseFormatter(curr[key]);
+                            break;
+                        case 'life_expectancy':
+                            ans[key] = prev[key] += curr[key] / leaves.length;
+                            break;
+                        default:
+                            ans[key] = prev[key];
+                    }
+                });
+                return ans;
+            } , initial);
+        },)
+        .entries(dataset_Countries2012);
+
+    var ret = [];
+    nestedRows.map(e => e.value).forEach(x => ret.push(x));
+
+    ret.forEach(d => formatStringRepresent(d));
+    return ret;
 }
 
 function drawTableRows(body, columns, data){
@@ -114,7 +176,17 @@ function drawTableRows(body, columns, data){
         .data(row => columns.map((column, i) => row[desireColumns[i]]))
         .enter()
         .append("td")
-        .text(d => d);
+        .text(d => d)
+        .attr('class', 'customCell')
+        .on('mouseover', function (d, i) {            // remember this shit, dear reader...
+            d3.select(this.parentNode)                // in this place we couldn't use some lambdas. Why?
+                .style("background-color", "#F3ED86") // because keyword 'this' in lambdas determined by where lambda
+        })                                            // was defined. DEFINED - NOT USED, KARL!
+        .on('mouseout', function () {
+            body.selectAll('tr')
+                .style("background-color", null);
+            colorizeTableInZebraStyle(body);
+        });;
 
     colorizeTableInZebraStyle(body);
 }
@@ -147,10 +219,12 @@ function formatStringRepresent(str) {
     str.population = d3.format(',')(str.population);
     str.life_expectancy = d3.format('.1f')(str.life_expectancy);
 
-    if(str.gdp > 1e9 && str.gdp < 1e12)
+    if(str.gdp >= 1e9 && str.gdp < 1e12)
         str.gdp = d3.formatPrefix(',.1', 1e9)(str.gdp);
-    if(str.gdp > 1e12)
+    if(str.gdp >= 1e12 && str.gdp < 1e15)
         str.gdp = d3.formatPrefix(',.1', 1e12)(str.gdp);
+    if(str.gdp >= 1e15)
+        str.gdp = d3.formatPrefix(',.1', 1e15)(str.gdp);
 }
 
 function getNeededColumnKeys(columnsKeys) {
