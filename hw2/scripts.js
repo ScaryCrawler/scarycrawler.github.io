@@ -18,6 +18,14 @@ let cbContinentsState = {
     Oceania: false
 };
 
+let continentColors = {
+    Americas: '#08573C',
+    Africa: '#C8CE1A',
+    Asia: '#108CB5',
+    Europe: '#B43613',
+    Oceania: '#5A042E'
+};
+
 let desireColumns = ['name', 'continent', 'gdp', 'life_expectancy', 'population', 'year'];
 
 let gdpParseFormatter = (str) =>
@@ -175,7 +183,6 @@ function aggregate() {
             initial.name = initial.continent = leaves[0].continent;
             initial.year = leaves[0].year;
 
-
             return leaves.reduce( (prev, curr) => {
                 let ans = {};
                 d3.keys(prev).forEach(key => {
@@ -203,6 +210,42 @@ function aggregate() {
     nestedRows.map(e => e.value).forEach(x => ret.push(x));
 
     ret.forEach(d => formatStringRepresent(d));
+    return ret;
+}
+
+function aggregateForChart() {
+    let nestedRows =  d3.nest()
+        .key(d => d['continent'])
+        .rollup(leaves => {
+            let initial = JSON.parse(JSON.stringify(leaves[0]));
+            d3.keys(initial).forEach(key => initial[key] = 0);
+            initial.name = initial.continent = leaves[0].continent;
+            initial.year = leaves[0].year;
+
+            return leaves.reduce( (prev, curr) => {
+                let ans = {};
+                d3.keys(prev).forEach(key => {
+                    switch (key) {
+                        case 'gdp':
+                        case 'population':
+                            ans[key] = prev[key] += curr[key];
+                            break;
+                        case 'life_expectancy':
+                            ans[key] = prev[key] += curr[key] / leaves.length;
+                            break;
+                        default:
+                            ans[key] = prev[key];
+                    }
+                });
+                return ans;
+            } , initial);
+        },)
+        .entries(dataset);
+
+    let ret = [];
+    nestedRows.map(e => e.value).forEach(x => ret.push(x));
+
+    // ret.forEach(d => formatStringRepresent(d));
     return ret;
 }
 
@@ -243,3 +286,133 @@ function formatStringRepresent(str) {
     if(str.gdp >= 1e15)
         str.gdp = d3.formatPrefix(',.1', 1e15)(str.gdp);
 }
+
+//------------------------------------BARCHART---------------------------------------------------------------------
+
+function drawChart() {
+    dataset = changeData(0);
+    // dataset.forEach(o => formatStringRepresent(o));
+
+    var margin = {top: 50, bottom: 10, left:50, right: 40};
+    var width = 1000 - margin.left - margin.right;
+    var bar_height = 15;
+    var height = bar_height*dataset.length - margin.top - margin.bottom;
+
+    var xScale = d3.scaleLinear().range([0, width]);
+    var yScale = d3.scaleBand().rangeRound([0, height], .8, 0);
+
+    var svg = d3.select("body").append("svg")
+        .attr("width", width+margin.left+margin.right)
+        .attr("height", height+margin.top+margin.bottom);
+
+    var max = d3.max(dataset, function(d) { return d.population; } );
+    var min = 0;
+
+    xScale.domain([min, max]);
+    yScale.domain(dataset.map(function(d) { return d.name; }));
+
+    var bar = svg.selectAll('g')
+        .data(dataset)
+        .enter().append('g')
+        .attr('transform', function(d, i) { return "translate(0," + i * bar_height + ")"; });
+
+    bar.append('rect').transition().duration(1000)
+        .attr('width', function(d) { return xScale(d.population); })
+        .attr('height', bar_height - 1)
+        .attr('x', 150)
+        .attr('fill', function(d) { return continentColors[d.continent] });
+
+    bar.append('text')
+        .text(function(d){
+            return d.name;
+        })
+        .attr('y', function(d, i){
+            return i + 9;
+        })
+
+    console.log(bar)
+        // .attr('class', 'lable');
+}
+
+var yearFilter = () => dataset.filter(e => Object.values(cbContinentsState).includes(true) ?
+    cbContinentsState[e['continent']] : true);
+
+function rangeChangeYearForChart(value){
+    dataset = changeData(value - d3.select('#rangeYear').property('min'));
+    updateBarChart(yearFilter())
+}
+
+function onCbChangedForChart(continent) {
+    cbContinentsState[continent] = d3.select('#cb' + continent).property('checked');
+    updateBarChart(yearFilter())
+}
+
+function onRbChangedForChart(aggregation) {
+    let data = dataset;
+    if (!d3.select('#rb' + aggregation).property('checked') &&
+        d3.select('#rb' + aggregation).attr('value') === 'None' ||
+        d3.select('#rb' + aggregation).property('checked') &&
+        d3.select('#rb' + aggregation).attr('value') === 'Continent' ){
+        data = aggregateForChart();
+    }
+
+    updateBarChart(data);
+}
+
+
+function updateBarChart(data){
+    // dataset = data;
+    var margin = {top: 50, bottom: 10, left:50, right: 40};
+    var width = 1600 - margin.left - margin.right;
+    var bar_height = 15;
+    var height = bar_height*data.length - margin.top - margin.bottom;
+    var xScale = d3.scaleLinear().range([0, width]);
+    var yScale = d3.scaleBand().rangeRound([0, height], .8, 0);
+
+    var svg = d3.select("svg")
+        .attr("height", height+margin.top+margin.bottom);
+
+    var max = d3.max(data, function(d) { return d.population; } );
+    var min = 0;
+
+    xScale.domain([min, max]);
+    yScale.domain(data.map(function(d) { return d.name; }));
+
+    var old_bar = svg.selectAll('g')
+        .data(data);
+
+    old_bar.select('rect').transition().duration(1000)
+        .attr('width', function(d) { return xScale(d.population); })
+        .attr('fill', function(d) { return continentColors[d.continent]})
+        .attr('height', bar_height - 1)
+        .attr('x', 150);
+
+    old_bar.select('text')
+        .text(function(d){
+            return d.name;
+        })
+        .attr('class', 'lable');
+
+    old_bar.exit().transition().duration(200).remove();
+    old_bar.selectAll('text').remove();
+
+    var new_bar = svg.selectAll('g')
+        .data(data);
+
+    new_bar.enter().append('g').attr('transform', function(d, i) { return "translate(0," + i * bar_height + ")"; })
+        .append('rect').transition().duration(1000)
+        .attr('fill', function(d) { return continentColors[d.continent] })
+        .attr('width', function(d) { return xScale(d.population); })
+        .attr('height', bar_height - 1)
+        .attr('x', 150);
+
+    var new_text = svg.selectAll('g').append('text')
+        .text(function(d){
+            return d.name;
+        })
+        .attr('y', function(d, i){
+            return i + 9;
+        })
+        .attr('class', 'lable');
+}
+

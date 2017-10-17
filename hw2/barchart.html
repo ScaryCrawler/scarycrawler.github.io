@@ -12,46 +12,46 @@
     // get data from remote server
     // if all right - save it to global variable and draw table
     d3.json("https://raw.githubusercontent.com/ScaryCrawler/scarycrawler.github.io/master/countries_1995_2012.json",
-       (error, data) => (error !== null) ? console.log(error) : (dataset_CountriesByYears = data, drawTableByAllYears())
+        (error, data) => (error !== null) ? console.log(error) : (dataset_CountriesByYears = data, drawChart())
     );
 
 </script>
 <div id="YearRange">
     <label>Time Update: </label>
     <label>1995</label>
-    <input type="range" min="1995" max="2012" step="1" value="1995" oninput="rangeChangeYear(value)" id="rangeYear">
+    <input type="range" min="1995" max="2012" step="1" value="1995" oninput="rangeChangeYearForChart(value)" id="rangeYear">
     <label>2012</label>
 </div>
 <div id="FilterBy">
     <label>Filter by: </label>
 
     <input type="checkbox" name="Americas" value="Americas" id="cbAmericas"
-           class="checkBox" onchange="onCbChanged(value)">
+           class="checkBox" onchange="onCbChangedForChart(value)">
     <label for="cbAmericas">Americas</label>
 
     <input type="checkbox" name="Africa" value="Africa" id="cbAfrica"
-           class="checkBox" onchange="onCbChanged(value)">
+           class="checkBox" onchange="onCbChangedForChart(value)">
     <label for="cbAfrica">Africa</label>
 
     <input type="checkbox" name="Asia" value="Asia" id="cbAsia"
-           class="checkBox" onchange="onCbChanged(value)">
+           class="checkBox" onchange="onCbChangedForChart(value)">
     <label for="cbAsia">Asia</label>
 
     <input type="checkbox" name="Europe" value="Europe" id="cbEurope"
-           class="checkBox" onchange="onCbChanged(value)">
+           class="checkBox" onchange="onCbChangedForChart(value)">
     <label for="cbEurope">Europe</label>
 
     <input type="checkbox" name="Oceania" value="Oceania" id="cbOceania"
-           class="checkBox" onchange="onCbChanged(value)">
+           class="checkBox" onchange="onCbChangedForChart(value)">
     <label for="cbOceania">Oceania</label>
 </div>
 <div>
     <label>Aggregation: </label>
 
-    <input type="radio" name="Aggregation" value="None" onclick="onRbChanged(value)" id="rbNone">
+    <input type="radio" name="Aggregation" value="None" onclick="onRbChangedForChart(value)" id="rbNone">
     <label>None</label>
 
-    <input type="radio" name="Aggregation" value="Continent" onclick="onRbChanged(value)" id="rbContinent">
+    <input type="radio" name="Aggregation" value="Continent" onclick="onRbChangedForChart(value)" id="rbContinent">
     <label>By Continent</label>
 </div>
 
