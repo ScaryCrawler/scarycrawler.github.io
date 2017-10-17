@@ -33,6 +33,9 @@ let gdpParseFormatter = (str) =>
 let populationParseFormatter = (str) => parseInt(str.replace(/,/g, ''));
 let sorter = (a, b, order) => order ? d3.ascending(a, b) : d3.descending(a, b);
 
+let yearFilter = () => dataset.filter(e => Object.values(cbContinentsState).includes(true) ?
+    cbContinentsState[e['continent']] : true);
+
 let changeCursorState = (header) => header ?
     'url(images/down-arrow_2.png), auto' : 'url(images/up-arrow_2.png), auto';
 
@@ -95,6 +98,14 @@ function drawTableRows(body, columns, data){
 
 function rangeChangeYear(value){
     dataset = changeData(value - d3.select('#rangeYear').property('min'));
+    if(needAggregation){
+        dataset = aggregate();
+    }
+
+    year = value;
+
+    dataset = yearFilter();
+
     dataset.forEach(o => formatStringRepresent(o));
 
     let tableBody = d3.select('table').select('tbody');
@@ -151,26 +162,31 @@ function onCbChanged(continent) {
 
     let tableBody = d3.select("table").select('tbody');
 
+    var data = yearFilter();
+
     tableCleaner(tableBody);
     drawTableRows(tableBody,
         desireColumns,
-        dataset.filter(e => Object.values(cbContinentsState).includes(true) ?
-            cbContinentsState[e['continent']] : true
-        ))
+        data
+    )
 }
 
 function onRbChanged(aggregation) {
+    dataset = changeData(year - d3.select('#rangeYear').property('min'));
     let data = dataset;
+    needAggregation = false;
     if (!d3.select('#rb' + aggregation).property('checked') &&
         d3.select('#rb' + aggregation).attr('value') === 'None' ||
         d3.select('#rb' + aggregation).property('checked') &&
         d3.select('#rb' + aggregation).attr('value') === 'Continent' ){
             data = aggregate();
+            needAggregation = true;
     }
 
     let tableBody = d3.select("table").select('tbody');
 
     tableCleaner(tableBody);
+    data.forEach(x => formatStringRepresent(x));
     drawTableRows(d3.select('table').select('tbody'), desireColumns, data)
 }
 
@@ -188,46 +204,8 @@ function aggregate() {
                 d3.keys(prev).forEach(key => {
                     switch (key) {
                         case 'gdp':
-                            curr[key] = curr[key].toString();
-                            ans[key] = prev[key] += gdpParseFormatter(curr[key]);
-                            break;
                         case 'population':
-                            ans[key] = prev[key] += populationParseFormatter(curr[key]);
-                            break;
-                        case 'life_expectancy':
-                            ans[key] = prev[key] += curr[key] / leaves.length;
-                            break;
-                        default:
-                            ans[key] = prev[key];
-                    }
-                });
-                return ans;
-            } , initial);
-        },)
-        .entries(dataset);
-
-    let ret = [];
-    nestedRows.map(e => e.value).forEach(x => ret.push(x));
-
-    ret.forEach(d => formatStringRepresent(d));
-    return ret;
-}
-
-function aggregateForChart() {
-    let nestedRows =  d3.nest()
-        .key(d => d['continent'])
-        .rollup(leaves => {
-            let initial = JSON.parse(JSON.stringify(leaves[0]));
-            d3.keys(initial).forEach(key => initial[key] = 0);
-            initial.name = initial.continent = leaves[0].continent;
-            initial.year = leaves[0].year;
-
-            return leaves.reduce( (prev, curr) => {
-                let ans = {};
-                d3.keys(prev).forEach(key => {
-                    switch (key) {
-                        case 'gdp':
-                        case 'population':
+                            curr[key] = curr[key] !== 0 ? curr[key] : 0.0;
                             ans[key] = prev[key] += curr[key];
                             break;
                         case 'life_expectancy':
@@ -289,9 +267,11 @@ function formatStringRepresent(str) {
 
 //------------------------------------BARCHART---------------------------------------------------------------------
 
+let year = 1995;
+let needAggregation = false;
+
 function drawChart() {
     dataset = changeData(0);
-    // dataset.forEach(o => formatStringRepresent(o));
 
     var margin = {top: 50, bottom: 10, left:50, right: 40};
     var width = 1000 - margin.left - margin.right;
@@ -328,17 +308,18 @@ function drawChart() {
         })
         .attr('y', function(d, i){
             return i + 9;
-        })
-
-    console.log(bar)
-        // .attr('class', 'lable');
+        });
 }
 
-var yearFilter = () => dataset.filter(e => Object.values(cbContinentsState).includes(true) ?
-    cbContinentsState[e['continent']] : true);
-
 function rangeChangeYearForChart(value){
-    dataset = changeData(value - d3.select('#rangeYear').property('min'));
+    if(needAggregation){
+        dataset = changeData(value - d3.select('#rangeYear').property('min'));
+        dataset = aggregate();
+    }
+    else
+        dataset = changeData(value - d3.select('#rangeYear').property('min'));
+
+    year = value;
     updateBarChart(yearFilter())
 }
 
@@ -348,20 +329,20 @@ function onCbChangedForChart(continent) {
 }
 
 function onRbChangedForChart(aggregation) {
+    dataset = changeData(year - d3.select('#rangeYear').property('min'));
     let data = dataset;
+    needAggregation = false;
     if (!d3.select('#rb' + aggregation).property('checked') &&
         d3.select('#rb' + aggregation).attr('value') === 'None' ||
         d3.select('#rb' + aggregation).property('checked') &&
         d3.select('#rb' + aggregation).attr('value') === 'Continent' ){
-        data = aggregateForChart();
+        data = aggregate();
+        needAggregation = true;
     }
-
     updateBarChart(data);
 }
 
-
 function updateBarChart(data){
-    // dataset = data;
     var margin = {top: 50, bottom: 10, left:50, right: 40};
     var width = 1600 - margin.left - margin.right;
     var bar_height = 15;
@@ -406,13 +387,11 @@ function updateBarChart(data){
         .attr('height', bar_height - 1)
         .attr('x', 150);
 
-    var new_text = svg.selectAll('g').append('text')
+    svg.selectAll('g').append('text')
         .text(function(d){
             return d.name;
         })
         .attr('y', function(d, i){
             return i + 9;
         })
-        .attr('class', 'lable');
 }
-
