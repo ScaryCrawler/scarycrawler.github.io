@@ -55,5 +55,18 @@
     <label>By Continent</label>
 </div>
 
+<div>
+    <label>Sort by: </label>
+
+    <input type="radio" name="Sort" value="name" onclick="onSortOrderChanged(value)" id="defaultSort">
+    <label>Name</label>
+
+    <input type="radio" name="Sort" value="population" onclick="onSortOrderChanged(value)">
+    <label>Population</label>
+
+    <input type="radio" name="Sort" value="gdp" onclick="onSortOrderChanged(value)">
+    <label>GDP</label>
+</div>
+
 </body>
 </html>

@@ -320,12 +320,16 @@ function rangeChangeYearForChart(value){
         dataset = changeData(value - d3.select('#rangeYear').property('min'));
 
     year = value;
-    updateBarChart(yearFilter())
+    updateBarChart(yearFilter());
+
+    setSortByDefault();
 }
 
 function onCbChangedForChart(continent) {
     cbContinentsState[continent] = d3.select('#cb' + continent).property('checked');
-    updateBarChart(yearFilter())
+    updateBarChart(yearFilter());
+
+    setSortByDefault();
 }
 
 function onRbChangedForChart(aggregation) {
@@ -340,6 +344,8 @@ function onRbChangedForChart(aggregation) {
         needAggregation = true;
     }
     updateBarChart(data);
+
+    setSortByDefault();
 }
 
 function updateBarChart(data){
@@ -395,3 +401,13 @@ function updateBarChart(data){
             return i + 9;
         })
 }
+
+function onSortOrderChanged(value) {
+    var d = yearFilter();
+
+    d.sort((a, b) => d3.descending(a[value], b[value]));
+
+    updateBarChart(d);
+}
+
+let setSortByDefault = () => d3.select('#defaultSort').property('checked', true);

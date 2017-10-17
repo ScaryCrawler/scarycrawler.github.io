@@ -38,3 +38,30 @@ Now years hold array of objects with detail data by years
 
 SVG - easy to scale, transform, animate. HTML - easiest to work with text data.
 
+## Questuion 7
+
+### Questuion 7.1
+
+let's say we want to show the customer or investor how much our technology exceeds existing ones.  
+For example, the developed algorithm is faster, the accuracy of the neural network is higher.
+
+### Questuion 7.2
+
+The impossibility of interaction and obtaining detailed information from specific data.  
+You can not see the dynamics
+
+### Questuion 7.5
+
+Correlation, level of abstraction, sequence.
+
+### Questuion 7.4
+
+Semantics allows abstracting and making some generalizations for the data. It is even possible to find new patterns.
+
+### Questuion 7.6
+
+Position, shape, hue, orientation, texture
+
+### Questuion 7.7
+
+Position, size, lightness
