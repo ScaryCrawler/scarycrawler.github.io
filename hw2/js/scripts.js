@@ -41,61 +41,6 @@ let changeCursorState = (header) => header ?
 
 let dataset;
 
-let tableCleaner = (tableBody) => tableBody.selectAll('tr').remove();
-
-let tableDrawer = () => d3.select('body').append('table').attr('class', 'tableClass');
-let tableHeadDrawer = (table) =>  table.append('thead').attr('class', 'thead');
-let tableBodyDrawer = (table) => table.append('tbody');
-
-let tableCaptionDrawer = (table) => table.append('caption')
-    .html("World Countries Ranking")
-    .attr('class', 'caption');
-
-function addTableHeaders(thead, tbody) {
-    thead.append('tr').selectAll('th')
-        .data(desireColumns)
-        .enter()
-        .append('th')
-        .attr('class', 'tableHeaders')
-        .text(d => d)
-        .on('click', function(header) { tbody
-            .selectAll('tr')
-            .sort((a, b) => sorting(a, b, header)),
-            sortingOrder[header] = !sortingOrder[header],
-            colorizeTableInZebraStyle(tbody),
-            d3.select(this)
-                .style('cursor', () => changeCursorState(sortingOrder[header]))
-        })
-        .on('mouseover', function (header) {
-            d3.select(this)
-                .style('cursor', () => changeCursorState(sortingOrder[header]))
-        });
-}
-
-function drawTableRows(body, columns, data){
-    let rows = body.selectAll("tr")
-        .data(data)
-        .enter()
-        .append("tr");
-
-    rows.selectAll("td")
-        .data(row => columns.map((column, i) => row[desireColumns[i]]))
-        .enter()
-        .append("td")
-        .text(d => d)
-        .attr('class', 'customCell')
-        .on('mouseover', function (d, i) {            // remember this shit, dear reader...
-            d3.select(this.parentNode)                // in this place we couldn't use some lambdas. Why?
-                .style("background-color", "#F3ED86") // because keyword 'this' in lambdas determined by where lambda
-        })                                            // was defined. DEFINED - NOT USED, KARL!
-        .on('mouseout', function () {
-            body.selectAll('tr')
-                .style("background-color", null);
-            colorizeTableInZebraStyle(body);
-        });
-    colorizeTableInZebraStyle(body);
-}
-
 function rangeChangeYear(value){
     dataset = changeData(value - d3.select('#rangeYear').property('min'));
     if(needAggregation){
@@ -110,7 +55,8 @@ function rangeChangeYear(value){
 
     let tableBody = d3.select('table').select('tbody');
 
-    tableCleaner(tableBody);
+    drawer.cleanTable(tableBody);
+    // cleanTable(tableBody);
     drawTableRows(tableBody, desireColumns, dataset)
 }
 
@@ -132,15 +78,19 @@ function changeData(year) {
 }
 
 function drawTable() {
-    let table = tableDrawer(),
-        thead = tableHeadDrawer(table),
-        tbody = tableBodyDrawer(table);
+    // TODO: need to refactor this
+    // Table table = new Table();
+    // table.drawTable();
 
-    tableCaptionDrawer(table);
-    addTableHeaders(thead, tbody);
-    drawTableRows(tbody, desireColumns, dataset);
+    // let table = tableDrawer(),
+    //     thead = tableHeadDrawer(table),
+    //     tbody = tableBodyDrawer(table);
 
-    colorizeTableInZebraStyle(tbody);
+    // tableCaptionDrawer(table);
+    // addTableHeaders(thead, tbody);
+    // drawTableRows(tbody, desireColumns, dataset);
+    //
+    // colorizeTableInZebraStyle(tbody);
 }
 
 function drawTableByAllYears() {
