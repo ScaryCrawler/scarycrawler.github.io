@@ -10,10 +10,11 @@
     <script src="js/infoPanel.js" async></script>
     <script src="js/barChart.js" async></script>
     <script src="js/map.js" async></script>
-    <script src="js/script.js" async></script>
+    <script src="js/startup.js" async></script>
+    <script src="js/datasets.js" async></script>
 </head>
 
-<body>
+<body onload="new Application().loadDatasets()">
 <div class="container">
     <header>
         <img src="assets/fifa_russia_logo.png" alt="Fifa WC Russia Logo" id="logo"/>
@@ -66,7 +67,7 @@
         </svg>
 
         <svg width="900" height="600">
-            <g id="map">            </g>
+            <g id="map"></g>
             <g id="points"></g>
         </svg>
     </div>

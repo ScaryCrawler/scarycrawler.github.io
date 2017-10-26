@@ -18,8 +18,6 @@ class BarChart {
      */
     updateBarChart(selectedDimension) {
 
-
-
         // ******* TODO: PART I *******
 
 
@@ -56,6 +54,6 @@ class BarChart {
         // ******* TODO: PART I *******
         //Changed the selected data when a user selects a different
         // menu item from the drop down.
-
+        this.updateBarChart();
     }
 }
