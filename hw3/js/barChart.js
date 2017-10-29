@@ -6,49 +6,83 @@ class BarChart {
      * @param worldMap
      * @param infoPanel
      * @param allData
+     *
+     * @property svg : area for svg zone
+     * @property x : scale for X-axis
+     * @property y: scale for Y-axis
      */
     constructor(worldMap, infoPanel, allData) {
         this.worldMap = worldMap;
         this.infoPanel = infoPanel;
         this.allData = allData;
+
+        this.svg = d3.select("#barChart");
+    }
+
+    chartConfiguration(svgArea, xScaleParam, yScaleParam) {
+        let margin = {
+            top: 10,
+            bottom: 30,
+            right: 5,
+            left: 50
+        };
+
+        let width = +svgArea.attr("width") - margin.left - margin.right,
+            height = +svgArea.attr("height") - margin.bottom - margin.top;
+
+        this.x = d3.scaleBand().rangeRound([0, width]).padding(0.1);
+        this.y = d3.scaleLinear().rangeRound([height, 0]);
+
+        this.x.domain(fifaDataset.championshipDataset.map(d => d[xScaleParam]));
+        this.y.domain([0, d3.max(fifaDataset.championshipDataset, d => d[yScaleParam])]);
+
+        this.svgGroup = this.svg.append("g")
+            .attr("transform", "translate(" + margin.left + "," +  margin.top +  ")");
+    }
+
+    drawBarChart(svgGroup, xScale, yScale) {
+        return svgGroup
+            .selectAll(".bar")
+            .data(fifaDataset.championshipDataset)
+            .enter()
+            .append("rect")
+                .attr("class", "bar")
+                .attr("x", d => this.x(d[xScale]))
+                .attr("y", d => this.y(d[yScale]))
+                .attr("width", this.x.bandwidth())
+                .attr("height", d => (this.svg.attr('height') - 30) - this.y(d[yScale])); // TODO: need to replace this hardcode
+    }
+
+    drawAxes(svgGroup) {
+        svgGroup.append("g")
+            .attr("class", "axisX")
+            .attr("transform", "translate(0," + (this.svg.attr('height') - 30) + ")")
+            .call(d3.axisBottom(this.x));
+
+        svgGroup.append("g")
+            .attr("class", "axisY")
+            .attr("transform", "translate(0," + 10 + ")")
+            .call(d3.axisLeft(this.y))
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                // .attr("y", 0)
+                // .attr("dy", "0.71em")
+                .attr("text-anchor", "end")
+                .text("Frequency");
     }
 
     /**
      * Render and update the bar chart based on the selection of the data type in the drop-down box
      */
     updateBarChart(selectedDimension) {
-        let svg = d3.select("#barChart");
+        // console.log(fifaDataset.championshipDataset);
 
-        console.log(svg);
-        console.log(fifaDataset.championshipDataset);
-
-        let margin = { top: 20, right: 20, bottom: 30, left: 40},
-            width = +svg.attr("width") - margin.left - margin.right, // redundant thing
-            heigth = +svg.attr("height") - margin.top - margin.bottom;
-
-        let x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
-            y = d3.scaleLinear().rangeRound([heigth, 0]);
-
-        let group = svg.append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-        x.domain(fifaDataset.championshipDataset.map(d => d["YEAR"]));
-        y.domain([0, d3.max(fifaDataset.championshipDataset, d => d["AVERAGE_ATTENDANCE"])]);
-
-        group.selectAll(".bar")
-            .data(fifaDataset.championshipDataset)
-            .enter()
-            .append("rect")
-            .attr("class", "bar")
-            .attr("x", d => x(d["YEAR"]))
-            .attr("y", d => y(d["AVERAGE_ATTENDANCE"]))
-            .attr("width", x.bandwidth())
-            .attr("height", d => heigth - y(d["AVERAGE_ATTENDANCE"]));
+        this.chartConfiguration(this.svg, 'YEAR', 'AVERAGE_ATTENDANCE');
+        this.drawAxes(this.svgGroup);
+        this.drawBarChart(this.svgGroup, 'YEAR', 'AVERAGE_ATTENDANCE');
 
 
         // ******* TODO: PART I *******
-
 
         // Create the x and y scales; make
         // sure to leave room for the axes
