@@ -62,6 +62,6 @@ function chooseData() {
     // Changed the selected data when a user selects a different
     // menu item from the drop down.
 
-    barchart = new BarChart();
-    barchart.chooseData();
+    let barChart = new BarChart();
+    barChart.chooseData();
 }
