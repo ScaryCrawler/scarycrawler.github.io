@@ -1,13 +1,13 @@
 class Application {
     loadDatasets() {
         d3.csv('https://raw.githubusercontent.com/ScaryCrawler/scarycrawler.github.io/master/hw3/data/fifa-world-cup.csv',
-            (error, data) => (error !== null) ? console.log(error) : fifaDataset.championshipDataset = data);
+            (error, data) => (error !== null) ?
+                console.log(error) : (fifaDataset.championshipDataset = data, window.barChart = new BarChart()));
         d3.json('https://raw.githubusercontent.com/ScaryCrawler/scarycrawler.github.io/master/hw3/data/world.json',
-            (error, data) => (error !== null) ? console.log(error) : fifaDataset.geographicDataset = data);
+            (error, data) => (error !== null) ?
+                console.log(error) : fifaDataset.geographicDataset = data);
     }
 }
-
-
 
 //
 // // Load CSV file
@@ -58,10 +58,5 @@ class Application {
  *  goals, matches, attendance and teams.
  */
 function chooseData() {
-    // ******* TODO: PART I *******
-    // Changed the selected data when a user selects a different
-    // menu item from the drop down.
-
-    let barChart = new BarChart();
     barChart.chooseData();
 }

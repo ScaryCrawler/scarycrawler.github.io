@@ -12,9 +12,9 @@ class BarChart {
      * @property y: scale for Y-axis
      */
     constructor(worldMap, infoPanel, allData) {
-        this.worldMap = worldMap;
-        this.infoPanel = infoPanel;
-        this.allData = allData;
+        // this.worldMap = worldMap;
+        // this.infoPanel = infoPanel;
+        // this.allData = allData;
 
         this.svg = d3.select("#barChart");
 
@@ -52,13 +52,15 @@ class BarChart {
             .data(fifaDataset.championshipDataset)
             .enter()
             .append("rect")
-                .transition()
-                .duration(this.animationSpeed)
                 .attr("class", "bar")
                 .attr("x", d => this.x(d[xScale]))
-                .attr("y", d => this.y(d[yScale]))
+                .attr("y", d => this.height)
                 .attr("width", this.x.bandwidth())
-                .attr("height", d => this.height - this.y(d[yScale])); // TODO: need to replace this hardcode
+                .attr("height", d => 0)
+                .transition()
+                .duration(this.animationSpeed)
+                .attr("y", d => this.y(d[yScale]))
+                .attr("height", d => this.height - this.y(d[yScale]));
     }
 
     drawAxes(svgGroup) {
@@ -72,30 +74,25 @@ class BarChart {
             .call(d3.axisLeft(this.y))
                 .append("text")
                 .attr("transform", "rotate(-90)")
-                // .attr("y", 0)
-                // .attr("dy", "0.71em")
                 .attr("text-anchor", "end")
     }
 
     clearBarChart() {
         this.svg
-            .selectAll("g")
-            .remove();
-            // .delay(this.animationSpeed);
+            .selectAll('g')
+            .remove()
     }
 
     /**
      * Render and update the bar chart based on the selection of the data type in the drop-down box
      */
     updateBarChart(selectedDimension) {
-        // console.log(fifaDataset.championshipDataset);
 
-        // this.clearBarChart();
+        this.clearBarChart();
 
         this.chartConfiguration(this.svg, 'YEAR', selectedDimension);
         this.drawAxes(this.svgGroup);
         this.drawBarChart(this.svgGroup, 'YEAR', selectedDimension);
-
 
         // ******* TODO: PART I *******
 
@@ -126,11 +123,8 @@ class BarChart {
      *  goals, matches, attendance and teams.
      */
     chooseData() {
-        // ******* TODO: PART I *******
-        //Changed the selected data when a user selects a different
-        // menu item from the drop down.
-        console.log(d3.select("#dataset")
-            .property('value'));
-        this.updateBarChart(this.timelineDictionary[d3.select("#dataset").property('value')]);
+        this.updateBarChart(this.timelineDictionary[d3
+            .select("#dataset")
+            .property('value')]);
     }
 }
