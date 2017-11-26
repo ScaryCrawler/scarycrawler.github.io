@@ -14,21 +14,29 @@ class ShiftChart {
      * @param selectedStates data corresponding to the states selected on brush
      */
     update(selectedStates){
-     
-     // ******* TODO: PART V *******
-    //Display the names of selected states in a list
+        console.log(selectedStates);
+        // ******* TODO: PART V *******
+        var shift = d3.select('#shiftChart')
+            .selectAll('li')
+            .data(selectedStates);
 
-    //******** TODO: PART VI*******
-    //Use the shift data corresponding to the selected years and sketch a visualization
-    //that encodes the shift information
+        shift.exit().remove();
 
-    //******** TODO: EXTRA CREDIT I*******
-    //Handle brush selection on the year chart and sketch a visualization
-    //that encodes the shift informatiomation for all the states on selected years
+        shift = shift.enter()
+            .append('li')
+            .merge(shift)
+            .text(d => d.State);
+        //******** TODO: PART VI*******
+        //Use the shift data corresponding to the selected years and sketch a visualization
+        //that encodes the shift information
 
-    //******** TODO: EXTRA CREDIT II*******
-    //Create a visualization to visualize the shift data
-    //Update the visualization on brush events over the Year chart and Electoral Vote Chart
+        //******** TODO: EXTRA CREDIT I*******
+        //Handle brush selection on the year chart and sketch a visualization
+        //that encodes the shift informatiomation for all the states on selected years
+
+        //******** TODO: EXTRA CREDIT II*******
+        //Create a visualization to visualize the shift data
+        //Update the visualization on brush events over the Year chart and Electoral Vote Chart
 
     };
 
