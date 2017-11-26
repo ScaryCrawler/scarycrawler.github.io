@@ -4,7 +4,7 @@ class ShiftChart {
     /**
      * Initializes the svg elements required for this chart;
      */
-    constructor(){
+    constructor() {
         this.divShiftChart = d3.select("#shiftChart").classed("sideBar", true);
     };
 
@@ -13,19 +13,26 @@ class ShiftChart {
      *
      * @param selectedStates data corresponding to the states selected on brush
      */
-    update(selectedStates){
-        console.log(selectedStates);
+    update(selectedStates) {
+        this.divShiftChart.selectAll(".brushed_state").remove();
         // ******* TODO: PART V *******
-        var shift = d3.select('#shiftChart')
-            .selectAll('li')
-            .data(selectedStates);
+        //Display the names of selected states in a list
+        let data = [];
+        for (var i = 0; i < selectedStates.length; i++) {
+            let state = selectedStates[i][0].State;
+            if (state !== undefined){
+                data.push(selectedStates[i][0].State);
+            }
+        }
 
-        shift.exit().remove();
-
-        shift = shift.enter()
+        this.divShiftChart.selectAll('li')
+            .data(data)
+            .enter()
             .append('li')
-            .merge(shift)
-            .text(d => d.State);
+            .html(String)
+            .classed("brushed_state", true);
+
+
         //******** TODO: PART VI*******
         //Use the shift data corresponding to the selected years and sketch a visualization
         //that encodes the shift information
@@ -38,7 +45,8 @@ class ShiftChart {
         //Create a visualization to visualize the shift data
         //Update the visualization on brush events over the Year chart and Electoral Vote Chart
 
-    };
+    }
+
 
 
 }

@@ -1,14 +1,18 @@
-
 class ElectoralVoteChart {
     /**
      * Constructor for the ElectoralVoteChart
      *
      * @param shiftChart an instance of the ShiftChart class
      */
-    constructor (shiftChart){
+    constructor(shiftChart) {
         this.shiftChart = shiftChart;
 
-        this.margin = {top: 30, right: 20, bottom: 30, left: 50};
+        this.margin = {
+            top: 30,
+            right: 20,
+            bottom: 30,
+            left: 50
+        };
         let divelectoralVotes = d3.select("#electoral-vote").classed("content", true);
 
         //Gets access to the div element created for this chart from HTML
@@ -18,10 +22,9 @@ class ElectoralVoteChart {
 
         //creates svg element within the div
         this.svg = divelectoralVotes.append("svg")
-            .attr("width",this.svgWidth)
-            .attr("height",this.svgHeight)
+            .attr("width", this.svgWidth)
+            .attr("height", this.svgHeight)
 
-        this.treshold = false;
     };
 
     /**
@@ -29,7 +32,15 @@ class ElectoralVoteChart {
      *
      * @param party an ID for the party that is being referred to.
      */
-
+    chooseClass(party) {
+        if (party === "R") {
+            return "republican";
+        } else if (party === "D") {
+            return "democrat";
+        } else if (party === "I") {
+            return "independent";
+        }
+    }
 
 
     /**
@@ -39,143 +50,178 @@ class ElectoralVoteChart {
      * @param colorScale global quantile scale based on the winning margin between republicans and democrats
      */
 
-    update (electionResult, colorScale){
-        function chooseClass (party) {
-            if (party == "R"){
-                return "republican";
-            }
-            else if (party == "D"){
-                return "democrat";
-            }
-            else if (party == "I"){
-                return "independent";
+    update(electionResult, colorScale) {
+
+        d3.select("#barArea").remove();
+
+        // ******* TODO: PART II *******
+
+        //Group the states based on the winning party for the state;
+        //then sort them based on the margin of victory
+        let self = this;
+        let stateGroups = {
+            "democrat": [],
+            "independent": [],
+            "republican": []
+        };
+
+
+        let republicanVotes = 0;
+        let democratVotes = 0;
+        let independentVotes = 0;
+        for (var i = 0; i < electionResult.length; i++) {
+            if (electionResult[i]["RD_Difference"] > 0) {
+                stateGroups["republican"].push(electionResult[i]);
+                republicanVotes += parseInt(electionResult[i]["Total_EV"]);
+            } else if (electionResult[i]["RD_Difference"] < 0) {
+                stateGroups["democrat"].push(electionResult[i]);
+                democratVotes += parseInt(electionResult[i]["Total_EV"]);
+            } else {
+                stateGroups["independent"].push(electionResult[i]);
+                independentVotes += parseInt(electionResult[i]["Total_EV"]);
             }
         }
 
-        // ******* TODO: PART II *******
-        var Gdata = d3.nest()
-            .key(function(d) { return d['State_Winner']; })
-            .rollup(function(v) {
-                return v.map(function (state) {
-                        return {
-                            'State' : state['State'],
-                            'State_Winner': state['State_Winner'],
-                            'Total_EV': state['Total_EV'],
-                            'RD_Difference': state['RD_Difference']
-                        }
-                    }
-                ).sort(function (a, b) { return a['RD_Difference'] - b['RD_Difference']; })
-            })
-            .entries(electionResult);
+        let sumOfVOtes = republicanVotes + democratVotes + independentVotes;
+        stateGroups["democrat"].sort(function(a, b) {
+            return a.RD_Difference - b.RD_Difference;
+        });
+        stateGroups["republican"].sort(function(a, b) {
+            return a.RD_Difference - b.RD_Difference;
+        });
+        let data = stateGroups["independent"].concat(stateGroups["democrat"].concat(stateGroups["republican"]));
 
-        var data = [];
-        Gdata.forEach(function (states) {
-            if(states.key == 'I'){
-                data = states.value.concat(data);
-            }
-            else{
-                data = data.concat(states.value);
+        //Create the stacked bar chart.
+        //Use the global color scale to color code the rectangles.
+        //HINT: Use .electoralVotes class to style your bars.
+        this.svg.append("g").attr("id", "barArea");
+
+        let bar = this.svg.select("#barArea").selectAll("g")
+            .data(data)
+            .enter().append("g");
+        let perc_so_far = 0;
+
+        bar.append("rect")
+            .attr("width", function(d) {
+                return ((d["Total_EV"] / sumOfVOtes) * 100) + "%";
+            })
+            .attr("x", function(d) {
+                let prev_perc = perc_so_far;
+                let this_perc = 100 * (d["Total_EV"] / sumOfVOtes);
+                perc_so_far = perc_so_far + this_perc;
+                return prev_perc + "%";
+            })
+            .attr("height", 40)
+            .attr("transform", "translate(50,50)")
+            .attr("fill", function(d) {
+                if (d["RD_Difference"] === 0) {
+                    return "green";
+                } else {
+                    return (colorScale(d["RD_Difference"]));
+                }
+            })
+            .classed("electoralVotes", true);
+
+        bar.append("line")
+            .style("stroke", "black")
+            .attr("x1", "50%")
+            .attr("y1", 48)
+            .attr("x2", "50%")
+            .attr("y2", 92)
+            .attr("transform", "translate(25,0)");
+        //Display total count of electoral votes won by the Democrat and Republican party
+        //on top of the corresponding groups of bars.
+        //HINT: Use the .electoralVoteText class to style your text elements;  Use this in combination with
+        // chooseClass to get a color based on the party wherever necessary
+
+
+        let prev = 0;
+        let labelArea = this.svg.select("#barArea").append("g");
+
+        labelArea.append("text")
+            .text("Electoral Vote (" + parseInt(sumOfVOtes / 2) + " needed to win)")
+            .attr("transform", "translate(" + (self.svgWidth / 2) + "," + 10 + ")")
+            .classed("yeartext", true);
+
+        labelArea.append("text").text(function(d) {
+            return independentVotes === 0 ? "" : independentVotes;
+        })
+            .attr("x", function(d) {
+                prev = independentVotes;
+                return 0 + "%";
+            })
+            .attr("fill", "green")
+            .classed("electoralVoteText", true);
+
+        labelArea.append("text").text(democratVotes)
+            .attr("x", function(d) {
+                if (prev === 0) {
+                    return 0 + "%";
+                }
+                return (democratVotes / sumOfVOtes * 100 - 20) + "%";
+            })
+            .attr("style", "fill: #6baed6")
+            .classed("electoralVoteText", true);
+
+        labelArea.append("text").text(republicanVotes)
+            .attr("x", function(d) {
+                return 89 + "%";
+            })
+            .attr("fill", "#de2d26")
+            .classed("electoralVoteText", true);
+
+        labelArea.selectAll(".electoralVoteText").attr("transform", "translate(50, 40)");
+        this.svg.select("#barArea").attr("transform", "translate(0,60)");
+
+        let brush = d3.brushX().extent([
+            [0, 0],
+            [self.svgWidth, 50]
+        ])
+            .on("end", function () {
+                self.brushed();
+            });
+
+        let brushArea = this.svg.select("#barArea").append("g");
+        brushArea.append('g').attr("class", "brush").attr("transform", "translate(50,50)").call(brush);
+
+
+        //Display a bar with minimal width in the center of the bar chart to indicate the 50% mark
+        //HINT: Use .middlePoint class to style this bar.
+
+        //Just above this, display the text mentioning the total number of electoral votes required
+        // to win the elections throughout the country
+        //HINT: Use .electoralVotesNote class to style this text element
+
+        //HINT: Use the chooseClass method to style your elements based on party wherever necessary.
+
+        //******* TODO: PART V *******
+        //Implement brush on the bar chart created above.
+        //Implement a call back method to handle the brush end event.
+        //Call the update method of shiftChart and pass the data corresponding to brush selection.
+        //HINT: Use the .brush class to style the brush.
+
+
+    };
+
+    brushed() {
+        let s = d3.event.selection,
+            x0 = s[0],
+            x1 = s[1];
+        let selectedStates = [];
+
+        d3.select("#barArea").selectAll("rect").each(function(d, i) {
+            let currectBarX = this.x.baseVal.value;
+            let currectBarWidth = this.width.baseVal.value;
+            let currentBarY = currectBarX + currectBarWidth;
+            if ((s[0] >= currectBarX && s[0] <= currentBarY)
+                || (s[1] >= currectBarX && s[1] <= currentBarY)
+                || (currectBarX > s[0] && currectBarX < s[1])) {
+                selectedStates.push(d3.select(this).data());
             }
         });
 
-
-        var svg = d3.select("#electoral-vote").select('svg');
-
-        var sum = d3.sum(data, d => d['Total_EV']);
-        var width = this.svgWidth - 20;
-
-        var bias = 0;
-        var bars = svg.selectAll('rect')
-            .data(data);
-        bars.exit().remove();
-
-        bars = bars.enter()
-            .append('rect')
-            .merge(bars)
-            .attr('y', 50)
-            .attr('x', function (d) {
-                var cur = bias;
-                bias += d.Total_EV * width / sum;
-                return cur;
-            })
-            .attr('height', 30)
-            .attr('width', d => d.Total_EV * width / sum)
-            .attr('class', 'electoralVotes')
-            .attr('fill', function (d) {
-                return d['State_Winner'] != 'I' ? colorScale(d.RD_Difference) : '#45AD6A';
-            });
-
-
-
-        var ev = Gdata.map(function (p) {
-            return {
-                'party': p.key,
-                'ev_count': d3.sum(p.value, s => s['Total_EV'])
-            }
-        })
-
-        var counts = svg.selectAll('text')
-            .data(ev);
-        counts.exit().remove();
-        counts = counts.enter()
-            .append('text')
-            .merge(counts)
-            .attr("dy", "40")
-            .attr("dx", function (d, i) {
-                if(d.party == 'I') return 0;
-                if(i == ev.length - 1){
-                    return width;
-                }
-                else{
-                    if (ev[i+1].party != 'I')
-                        return 0;
-                    else
-                        return ev[i+1].ev_count * width / sum;
-                }
-            })
-            .attr('class', function (d) {
-                return 'electoralVoteText ' + chooseClass(d.party);
-            })
-            .text(function(d) { return d.ev_count; });
-
-        if(!this.treshold){
-
-            svg.append('line')
-                .attr("x1", width/2)
-                .attr("x2", width/2)
-                .attr("y1", 40)
-                .attr("y2", 90)
-                .attr('stroke', 'black');
-
-            this.treshold = true;
-        }
-
-        var half = Math.ceil(sum / 2) + 1
-        svg.append('text')
-            .attr("dy", "35")
-            .attr("dx", width/2)
-            .attr('class', 'electoralVotesNote')
-            .text('Electoral Vote ('+half+' needed to win)');
-
-        //******* TODO: PART V *******
-        var shiftChart = this.shiftChart;
-        function brushed() {
-            var s = d3.event.selection;
-            var selectedData = []
-            if (s != null) {
-                selectedData = bars.filter(function (d) {
-                    var x = d3.select(this).attr('x');
-                    var y = d3.select(this).attr('y');
-                    return x >= s[0] && x <= s[1];
-                })._groups[0]
-                    .map(d => d.__data__);
-            }
-            shiftChart.update(selectedData);
-        }
-        var brush = d3.brushX().extent([[0,40],[this.svgWidth, 90]]).on("end", brushed);
-        svg.append("g").attr("class", "brush").call(brush);
-
-    };
+        this.shiftChart.update(selectedStates);
+    }
 
 
 }

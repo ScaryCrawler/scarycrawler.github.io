@@ -1,4 +1,3 @@
-
 class YearChart {
 
     /**
@@ -10,7 +9,7 @@ class YearChart {
      * @param electionInfo instance of ElectionInfo
      * @param electionWinners data corresponding to the winning parties over mutiple election years
      */
-    constructor (electoralVoteChart, tileChart, votePercentageChart, electionWinners) {
+    constructor(electoralVoteChart, tileChart, votePercentageChart, electionWinners) {
 
         //Creating YearChart instance
         this.electoralVoteChart = electoralVoteChart;
@@ -20,12 +19,17 @@ class YearChart {
         this.electionWinners = electionWinners;
 
         // Initializes the svg elements required for this chart
-        this.margin = {top: 10, right: 20, bottom: 30, left: 50};
+        this.margin = {
+            top: 10,
+            right: 20,
+            bottom: 30,
+            left: 50
+        };
         let divyearChart = d3.select("#year-chart").classed("fullView", true);
 
         //fetch the svg bounds
         this.svgBounds = divyearChart.node().getBoundingClientRect();
-        this.svgWidth = this.svgBounds.width*1 - this.margin.left - this.margin.right;
+        this.svgWidth = this.svgBounds.width - this.margin.left - this.margin.right;
         this.svgHeight = 100;
 
         //add the svg to the div
@@ -40,23 +44,21 @@ class YearChart {
      *
      * @param party an ID for the party that is being referred to.
      */
-
+    chooseClass(data) {
+        if (data === "R") {
+            return "yearChart republican";
+        } else if (data === "D") {
+            return "yearChart democrat";
+        } else if (data === "I") {
+            return "yearChart independent";
+        }
+    }
 
     /**
      * Creates a chart with circles representing each election year, populates text content and other required elements for the Year Chart
      */
-    update () {
-        function chooseClass (data) {
-            if (data == "R") {
-                return "yearChart republican";
-            }
-            else if (data == "D") {
-                return "yearChart democrat";
-            }
-            else if (data == "I") {
-                return "yearChart independent";
-            }
-        }
+    update() {
+
         //Domain definition for global color scale
         let domain = [-60, -50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50, 60];
 
@@ -67,62 +69,81 @@ class YearChart {
         this.colorScale = d3.scaleQuantile()
             .domain(domain)
             .range(range);
-        var ColorScale = this.colorScale;
+        let self = this;
+        let xScale = d3.scaleBand().range([0, self.svgWidth]);
+
+        xScale.domain(self.electionWinners.map(function(d) {
+            return d.YEAR;
+        }));
+
+        let svg = d3.select("#year-chart").select("svg")
+            .append("g")
+            .attr("class", "lineChart")
+            .attr("transform", "translate(0, 50)")
+            .call(d3.axisBottom(xScale).ticks(self.electionWinners.length)
+                .tickFormat(function (time) {
+                    return time;
+                })
+            );
+        svg.select("path")
+            .append("line")
+            .attr("class", "lineChart");
+
+        svg.selectAll("g")
+            .append("circle")
+            .attr("r", 20)
+            .attr("class", function(d) {
+                for (var i = 0; i < self.electionWinners.length; i++) {
+                    if (self.electionWinners[i].YEAR === d) {
+                        break;
+                    }
+                }
+                return self.chooseClass(self.electionWinners[i].PARTY);
+            })
+            .on("mouseover", function(d) {
+                d3.select(this).classed("highlighted", true);
+            })
+            .on('mouseout', function(d) {
+                d3.selectAll("circle").classed("highlighted", false);
+            })
+            .on("click", function(d) {
+                d3.selectAll("circle").classed("selected", false);
+                d3.select(this).classed("selected", true);
+                d3.selectAll(".brushed_state").remove();
+
+                d3.csv("data/Year_Timeline_" + d + ".csv", function(error, data) {
+                    self.electoralVoteChart.update(data, self.colorScale);
+                    self.tileChart.update(data, self.colorScale);
+                    self.votePercentageChart.update(data, self.colorScale);
+                });
+            });
+
+        svg.selectAll("text")
+            .attr("transform", "translate(0, 20)")
+            .attr("class", "yeartext");
+
+        // Compute the minimum and maximum date, and the maximum price.
+
         // ******* TODO: PART I *******
 
-        var data = this.electionWinners;
-        var svg = d3.select('#year-chart')
-            .select('svg');
+        // Create the chart by adding circle elements representing each election year
+        //The circles should be colored based on the winning party for that year
+        //HINT: Use the .yearChart class to style your circle elements
+        //HINT: Use the chooseClass method to choose the color corresponding to the winning party.
 
-        var xScale = d3.scaleLinear()
-            .domain([d3.min(data, d => d.YEAR), d3.max(data, d => d.YEAR)])
-            .range([30,this.svgWidth - 30]);
+        //Append text information of each year right below the corresponding circle
+        //HINT: Use .yeartext class to style your text elements
 
-        svg.append('line')
-            .attr("x1", 0)
-            .attr("y1", this.svgHeight/2)
-            .attr("x2", this.svgWidth )
-            .attr("y2", this.svgHeight/2)
-            .style("stroke-dasharray", ("2, 2"))
-            .attr('stroke', 'black');
+        //Style the chart by adding a dashed line that connects all these years.
+        //HINT: Use .lineChart to style this dashed line
 
-        var yearAxis = svg.selectAll('.yearChart')
-            .data(data)
-            .enter()
-            .append("g")
-            .attr("class", "yearChart");
+        //Clicking on any specific year should highlight that circle and  update the rest of the visualizations
+        //HINT: Use .highlighted class to style the highlighted circle
 
-        yearAxis.append("circle")
-            .attr("r", '10')
-            .attr('class', function (d) {
-                return chooseClass(d['PARTY']);
-            })
-            .attr("transform", function(d, i) {
-                return "translate("+ xScale(d.YEAR) + ",50)";
-            });
+        //Election information corresponding to that year should be loaded and passed to
+        // the update methods of other visualizations
 
-        yearAxis.append("text")
-            .attr("dy", "90")
-            .attr("dx", d => xScale(d.YEAR))
-            .attr('class', 'yeartext')
-            .text(function(d) { return d.YEAR; });
 
-        var s = this;
-        yearAxis.on('click', function (d) {
-            yearAxis.selectAll('circle')
-                .classed('selected', false)
-                .classed('highlighted', false);
-            d3.select(this)
-                .select('circle')
-                .classed('selected', true)
-                .classed('highlighted', true);
-
-            d3.csv("data/Year_Timeline_" + d.YEAR + ".csv", function (error, electionResult) {
-                s.electoralVoteChart.update(electionResult, ColorScale);
-                s.tileChart.update(electionResult, ColorScale);
-                s.votePercentageChart.update(electionResult);
-            });
-        });
 
         //******* TODO: EXTRA CREDIT *******
 

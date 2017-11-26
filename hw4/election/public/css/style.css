@@ -1,61 +1,55 @@
-
-
 body {
     font-family: Lato;
 }
 
 h1 {
     font-family: "Arvo";
-    font-size:35px;
+    font-size: 35px;
     color: #464646;
     margin: 0px;
     padding: 0px;
     margin-left: 20px;
 }
-.info{
+
+.info {
     margin-left: 20px;
 }
+
 .tile {
     stroke: #FFF;
     stroke-width: 4;
 }
-.dotted {
-    border:none;
-    border-top:1px dotted #f00;
-    color:#fff;
-    background-color:#fff;
-    height:1px;
-    width:50%;
-}
 
-.yeartext, .tilestext, .brushtext{
-    text-anchor:middle;
-    font-size: 16px;
+.yeartext, .tilestext, .brushtext {
+    text-anchor: middle;
+    font-size: 20px;
     fill: #565656;
-    color: #565656;
     stroke-width: 0.1px;
-    stroke: #e5e5e5;
+    /*stroke: #e5e5e5;*/
 }
 
-.electoralVotesNote, .votesPercentageNote{
-    text-anchor:middle;
-    font-size: 12px;
+.electoralVotesNote, .votesPercentageNote {
+    text-anchor: middle;
+    font-size: 24px;
 }
 
-.electoralVoteText, .votesPercentageText{
-    font-size: 14px;
-}
-.end{
-    text-anchor:end;
+.electoralVoteText, .votesPercentageText {
+    font-size: 23px;
 }
 
-.nomineeInfoText{
+.end {
+    text-anchor: end;
+}
+
+.nomineeInfoText {
     font-size: 36px;
 }
-.Axis{
+
+.Axis {
     stroke: #eee;
     stroke-width: 4;
 }
+
 .content {
     display: inline-block;
     width: 70%;
@@ -64,66 +58,69 @@ h1 {
 .sideBar {
     display: inline-block;
     width: 30%;
-    float:right;
+    float: right;
 }
 
-.electoralVotes{
+.electoralVotes {
     stroke: #eee;
 }
 
-.middlePoint{
+.middlePoint {
     stroke: #eee;
 }
 
-.fullView{
+.fullView {
     display: inline-block;
     width: 100%;
 }
 
-.yearChart{
+.yearChart {
     stroke: #FFF;
 }
 
-.republican{
+.republican {
     fill: #de2d26;
     color: #de2d26;
-    text-anchor:end;
-}
-.democrat{
-    fill: #3182bd;
-    text-anchor:start;
-    color: #3182bd;
-}
-.independent{
-    fill: #45AD6A;
-    color: #45AD6A;
-    text-anchor:start;
+    text-anchor: end;
 }
 
-.votesPercentage{
+.democrat {
+    fill: #3182bd;
+    text-anchor: start;
+    color: #3182bd;
+}
+
+.independent {
+    fill: #45AD6A;
+    color: #45AD6A;
+    text-anchor: start;
+}
+
+.votesPercentage {
     stroke: #eee;
 }
 
-.highlighted{
+.highlighted {
     stroke: #404040;
-    stroke-width:4;
+    stroke-width: 4;
 }
 
 .brush .selection {
     fill-opacity: .5;
 }
 
-.selected{
-    stroke: #404040;;
-    stroke-width:4;
-    r:14px;
+.selected {
+    stroke: #404040;
+;
+    stroke-width: 4;
+    r: 25px;
 }
 
-
-h2{
+h2 {
     -webkit-margin-before: 5px;
-    -webkit-margin-after:  5px;
+    -webkit-margin-after: 5px;
 }
+
 .d3-tip {
     /*line-height: 5;*/
     padding-left: 10px;
@@ -136,13 +133,14 @@ h2{
     border-radius: 10px;
     pointer-events: none;
 }
-.tooltip-title{
-    font-size:18px;
-    font-family: "Arial Black";
 
+.tooltip-title {
+    font-size: 18px;
+    font-family: "Arial Black";
 }
 
 /* Creates a small triangle extender for the tooltip */
+
 .d3-tip:after {
     /*box-sizing: border-box;*/
     display: inline;
@@ -155,6 +153,7 @@ h2{
 }
 
 /* Northward tooltips */
+
 .d3-tip.n:after {
     content: "\25BC";
     /*margin: -1px 0 0 0;*/
@@ -164,6 +163,7 @@ h2{
 }
 
 /* Eastward tooltips */
+
 .d3-tip.e:after {
     content: "\26A0";
     /*margin: -4px 0 0 0;*/
@@ -172,6 +172,7 @@ h2{
 }
 
 /* Southward tooltips */
+
 .d3-tip.s:after {
     content: "\25B2";
     /*margin: 4px 0 1px 0;*/
@@ -181,6 +182,7 @@ h2{
 }
 
 /* Westward tooltips */
+
 .d3-tip.w:after {
     content: "\25B6";
     /*margin: -4px 0 0 -1px;*/
@@ -188,8 +190,16 @@ h2{
     left: 100%;
 }
 
-h3{
-    text-anchor:middle;
+h3 {
+    text-anchor: middle;
     font-size: 32px;
 }
 
+.lineChart {
+    stroke-dashoffset: 2;
+    color: #464646;
+}
+
+.label {
+    font-size: 11px;
+}
